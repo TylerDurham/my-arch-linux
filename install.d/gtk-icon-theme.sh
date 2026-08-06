@@ -3,10 +3,10 @@
 # gtk-icon-theme.sh - install (or remove) the Tela-circle icon theme
 #
 # Usage:
-#   ./icon-theme.sh              install the icons and select them via gsettings
-#   ./icon-theme.sh -f|--force   reinstall even if the theme is already present
-#   ./icon-theme.sh -r|--revert  uninstall the theme and reset gsettings
-#   ./icon-theme.sh -h|--help    show this help
+#   ./gtk-icon-theme.sh              install the icons and select them via gsettings
+#   ./gtk-icon-theme.sh -f|--force   reinstall even if the theme is already present
+#   ./gtk-icon-theme.sh -r|--revert  uninstall the theme and reset gsettings
+#   ./gtk-icon-theme.sh -h|--help    show this help
 #
 # The theme is built from vinceliuice/Tela-circle-icon-theme, whose install.sh
 # writes the variants into ~/.local/share/icons and rebuilds the icon caches.
