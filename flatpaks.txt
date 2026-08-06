@@ -1,0 +1,3 @@
+flatpak run tv.plex.PlexDesktop
+flatpak install flathub com.plexamp.Plexamp
+flatpak install flathub com.github.tchx84.Flatseal
