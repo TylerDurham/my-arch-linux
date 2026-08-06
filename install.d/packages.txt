@@ -7,6 +7,8 @@ hyprland
 hyprshutdown
 jq
 lsd
+imagemagick
+matugen
 neofetch
 neovim
 rofi
