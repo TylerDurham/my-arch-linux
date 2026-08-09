@@ -1,0 +1,170 @@
+# package	# category	description
+# ---------------------------------------------------------------------------
+# Fields are tab-delimited. Column 1 = package attr name (nixpkgs unless noted).
+# Everything after column 1 is prefixed with '#' so lines are shell-safe.
+# Source: TylerDurham/my-nixos @ master
+# ---------------------------------------------------------------------------
+
+# === boot / console ========================================================
+terminus_font	# boot	Bitmap console font (ter-132n) for the TTY
+linuxPackages_latest	# boot	Latest mainline kernel package set
+adi1090x-plymouth-themes	# boot	Plymouth boot splash themes (built with only the 'lone' theme)
+plymouth	# boot	Graphical boot splash daemon
+systemd-boot	# boot	EFI bootloader (enabled via boot.loader.systemd-boot)
+OVMF	# boot	UEFI firmware; symlinked to /usr/share/OVMF for Claude Cowork
+virtiofsd	# virt	virtio-fs daemon; symlinked to /usr/libexec for Claude Cowork
+
+# === shell / CLI ===========================================================
+zsh	# shell	Z shell; login shell for user dtd
+bash	# shell	Bash shell, configured via home-manager
+starship	# shell	Fast, customizable cross-shell prompt
+zoxide	# shell	Smarter cd that learns frequently used directories
+fzf	# shell	Command-line fuzzy finder
+bat	# cli	cat clone with syntax highlighting and git integration
+lsd	# cli	Modern ls replacement with icons and colors
+tree	# cli	Recursive directory listing as a tree
+ripgrep	# cli	Fast recursive grep alternative (rg)
+jq	# cli	Command-line JSON processor
+curl	# cli	Transfer data via URLs
+wget	# cli	Command-line file downloader
+envsubst	# cli	Environment-variable substitution in text (gettext)
+gzip	# cli	GNU compression utility
+unzip	# cli	ZIP archive extractor
+stow	# cli	Symlink farm manager for dotfiles
+tmux	# cli	Terminal multiplexer
+ncdu	# cli	NCurses disk usage analyzer
+btop	# cli	Resource monitor (CPU/mem/disk/net)
+inotify-tools	# cli	Filesystem event monitoring utilities
+yazi	# cli	Fast terminal file manager
+imagemagick	# cli	Image manipulation toolkit (convert/magick)
+claude-code	# cli	Anthropic Claude Code CLI agent
+
+# === editors ===============================================================
+neovim	# editor	Extensible terminal text editor (default $EDITOR)
+vim	# editor	Classic terminal text editor
+nix-ld	# editor	Dynamic-linker shim so Mason can install stylua in Neovim
+
+# === terminals =============================================================
+ghostty	# terminal	GPU-accelerated terminal emulator
+kitty	# terminal	GPU-accelerated terminal emulator
+xdg-terminal-exec	# terminal	XDG default-terminal launcher spec implementation
+
+# === wayland / hyprland ====================================================
+hyprland	# wayland	Wayland tiling compositor (XWayland enabled)
+xwayland	# wayland	X11 compatibility server for Wayland
+hypridle	# wayland	Idle daemon for Hyprland (triggers lock/sleep)
+hyprlock	# wayland	GPU-accelerated screen locker for Hyprland
+hyprlauncher	# wayland	Application launcher built for Hyprland
+hyprshutdown	# wayland	Power menu / shutdown dialog for Hyprland
+hyprsunset	# wayland	Blue-light filter for Hyprland
+hyprpolkitagent	# wayland	Polkit authentication agent for Hyprland (user service)
+waybar	# wayland	Highly customizable Wayland status bar
+swww	# wayland	Wayland wallpaper daemon with transitions
+rofi	# wayland	Application launcher and window switcher
+swaynotificationcenter	# wayland	Notification center for wlroots compositors
+swayosd	# wayland	On-screen display for volume/brightness
+grimblast	# wayland	Hyprland screenshot tool (wraps grim + slurp)
+wl-clipboard	# wayland	Wayland clipboard utilities (wl-copy/wl-paste)
+xdg-desktop-portal-hyprland	# wayland	XDG desktop portal backend for Hyprland
+xdg-desktop-portal-gtk	# wayland	GTK XDG desktop portal backend
+xdg-utils	# wayland	Desktop integration helpers (xdg-open)
+libnotify	# wayland	Desktop notification library (notify-send)
+libappindicator-gtk3	# wayland	System tray indicator support for GTK apps
+brightnessctl	# wayland	Screen and keyboard brightness control
+
+# === desktop / GNOME bits ==================================================
+nautilus	# desktop	GTK file manager
+gnome-calculator	# desktop	GNOME calculator
+gnome-keyring	# desktop	Secret Service provider (org.freedesktop.secrets)
+libsecret	# desktop	Keyring access library for GNOME secrets
+dconf	# desktop	GSettings configuration backend
+nwg-look	# desktop	GTK theme switcher for wlroots compositors
+gvfs	# desktop	Virtual filesystem for GNOME (trash, mtp, network mounts)
+pavucontrol	# desktop	PulseAudio/PipeWire volume control GUI
+
+# === themes / fonts ========================================================
+nerd-fonts.jetbrains-mono	# fonts	Monospace font patched with icon glyphs
+sf-pro-fonts	# fonts	Apple SF Pro Display (local derivation, fonts/sf-pro)
+biorhyme-fonts	# fonts	BioRhyme display font (local derivation, fonts/bio-rhyme)
+special-elite-font	# fonts	Vintage typewriter font (local derivation, fonts/special-elite)
+graphite-gtk-theme	# theme	GTK theme, orange/dark/rimless variant
+tela-circle-icon-theme	# theme	Tela circle dark icon theme
+
+# === media =================================================================
+mpv	# media	General-purpose media player
+vlc	# media	Versatile media player
+imv	# media	Lightweight Wayland image viewer
+pinta	# media	Simple raster image editor
+playerctl	# media	MPRIS media player controller
+spotify	# media	Music streaming client
+plex-desktop	# media	Plex media player desktop app
+plexamp	# media	Plex music player
+
+# === applications ==========================================================
+brave	# apps	Chromium browser, wrapped with --password-store=basic
+claude-desktop	# apps	Official Claude desktop app (local derivation from Anthropic .deb)
+obsidian	# apps	Markdown knowledge base / note-taking
+signal-desktop	# apps	Encrypted messaging client
+dropbox	# apps	Dropbox sync daemon (run as a user systemd service)
+dropbox-cli	# apps	Dropbox CLI + Nautilus extension and sync emblems
+
+# === development ===========================================================
+gcc	# dev	GNU C/C++ compiler toolchain
+gnumake	# dev	GNU make build tool
+just	# dev	Command runner (justfile)
+mise	# dev	Polyglot dev-tool version manager (programs.mise)
+uv	# dev	Fast Python package/project manager (also listed under python)
+tree-sitter	# dev	Incremental parsing library and CLI
+nixd	# dev	Nix language server
+hugo	# dev	Static site generator
+stylua	# dev	Lua code formatter
+github-cli	# dev	GitHub CLI (gh)
+grc	# dev	Generic colouriser for command output
+
+# --- go ---
+go	# dev-go	Go compiler and toolchain
+gopls	# dev-go	Go language server
+gotools	# dev-go	Supplementary Go tools (goimports, etc.)
+
+# --- node ---
+nodejs	# dev-node	Node.js runtime
+bun	# dev-node	Bun JavaScript runtime and package manager
+prettier	# dev-node	Opinionated code formatter
+
+# --- python ---
+python3	# dev-python	CPython 3 interpreter
+black	# dev-python	Python code formatter
+isort	# dev-python	Python import sorter
+
+# === version control =======================================================
+git	# vcs	Distributed version control, SSH-signed commits via 1Password
+delta	# vcs	Syntax-highlighting pager for git diffs
+lazygit	# vcs	Terminal UI for git
+
+# === containers ============================================================
+docker	# container	Container runtime (rootless, weekly autoprune)
+lazydocker	# container	Terminal UI for Docker
+
+# === gaming ================================================================
+steam	# gaming	Steam client with Proton, remote play firewall opened
+gamescope	# gaming	Micro-compositor for fullscreen/scaling/FPS limiting
+gamemode	# gaming	CPU governor and process priority tweaks while gaming
+mangohud	# gaming	In-game FPS/frametime/temperature overlay
+protonup-qt	# gaming	Manage Proton-GE builds
+
+# === audio / bluetooth =====================================================
+pipewire	# audio	Audio server with PulseAudio compatibility
+bluez	# bluetooth	Bluetooth protocol stack (hardware.bluetooth)
+blueman	# bluetooth	GTK Bluetooth manager and applet
+
+# === security ==============================================================
+_1password	# security	1Password CLI (provides op-ssh-sign for commit signing)
+_1password-gui	# security	1Password desktop app, polkit owner dtd
+fprintd	# security	Fingerprint auth daemon (sudo, polkit, hyprlock, 1Password)
+openssh	# security	SSH server, key-only auth, root login prohibited
+
+# === networking / system services ==========================================
+networkmanager	# network	Network connection manager
+avahi	# network	mDNS/DNS-SD service discovery (nssmdns4)
+power-profiles-daemon	# system	Power profile switching daemon
+libinput	# system	Input device handling for Wayland
