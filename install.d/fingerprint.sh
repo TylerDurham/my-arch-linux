@@ -295,7 +295,32 @@ check_hyprlock() {
     fi
 }
 
+# 1Password re-evaluates whether it can actually use system auth every time it
+# renders the lock screen and logs the verdict. That status - not the settings
+# toggle - is what gates fingerprint unlock.
+#
+# Prefer the app's own log: only an instance started by the systemd user unit
+# lands in the journal, and one launched from a launcher or a shell does not, so
+# the journal happily serves a verdict from a long-dead process. Empty means the
+# lock screen has not rendered since the log rolled - lock the app to get one.
+# Exits non-zero when there is no match; call with '|| true'.
+op_sysauth_status() {
+    local log="${XDG_CONFIG_HOME:-${HOME}/.config}/1Password/logs/1Password_rCURRENT.log"
+
+    if [[ -r "$log" ]] && grep -q 'Sys auth status' "$log" 2>/dev/null; then
+        grep -o 'Sys auth status [A-Za-z]*' "$log" | tail -n1 | awk '{print $NF}'
+        return
+    fi
+
+    journalctl -t 1password --since "24 hours ago" --no-pager 2>/dev/null \
+        | grep -o 'Sys auth status [A-Za-z]*' \
+        | tail -n1 \
+        | awk '{print $NF}'
+}
+
 check_1password() {
+    local sysauth
+
     if ! is_installed 1password; then
         return
     fi
@@ -304,11 +329,35 @@ check_1password() {
     # them, so this only ever reads.
     if [[ -f "$OP_SETTINGS" ]] && command -v jq >/dev/null 2>&1 \
        && [[ "$(jq -r '."security.authenticatedUnlock.enabled" // false' "$OP_SETTINGS")" == "true" ]]; then
-        info "1Password: system authentication is already enabled."
+        info "1Password: 'Unlock using system authentication service' is switched on."
     else
         warn "1Password: enable Settings -> Security -> 'Unlock using system"
         warn "authentication service', then lock with Ctrl+L and unlock to test."
     fi
+
+    # The toggle only records intent. A switched-on toggle sitting on top of a
+    # 'NotSetup' status is the failure mode that reads as success: every piece of
+    # OS plumbing below can be verified working while unlock still never happens.
+    sysauth="$(op_sysauth_status || true)"
+    case "$sysauth" in
+        Ready)
+            info "1Password: system unlock reports Ready."
+            ;;
+        '')
+            warn "1Password: no 'Sys auth status' line in the last 24h of logs, so"
+            warn "there is nothing to judge yet. Lock with Ctrl+L, then re-run --status."
+            ;;
+        *)
+            warn "1Password: system unlock reports '${sysauth}' despite the toggle being on."
+            warn "This is a 1Password-side state problem; PAM and polkit can be fully"
+            warn "working and it will still refuse. Confirm the OS side first:"
+            warn "    pkcheck --action-id com.1password.1Password.unlock --process \$\$ -u"
+            warn "If that accepts a scan, quit 1Password completely (a tray close is not"
+            warn "enough) and toggle system authentication off and back on to rebuild"
+            warn "its unlock key - re-adding the key without a restart does not stick:"
+            warn "    systemctl --user stop app-1password@autostart.service"
+            ;;
+    esac
 
     [[ -f /usr/share/polkit-1/actions/com.1password.1Password.policy ]] \
         || warn "1Password's polkit policy is missing; reinstall the 1password package."
@@ -325,6 +374,13 @@ check_1password() {
         else
             warn "    pacman -S polkit-kde-agent  (then enable plasma-polkit-agent.service)"
         fi
+    elif pgrep -f hyprpolkitagent >/dev/null 2>&1; then
+        # hyprpolkitagent has no fingerprint-specific UI, so it renders a bare
+        # password box and never says "place your finger". The scan still works:
+        # pam_fprintd is 'sufficient' and short-circuits the stack, dismissing the
+        # dialog on a match. A password-only prompt is not evidence of failure.
+        info "polkit agent: hyprpolkitagent (shows a password box only; scanning"
+        info "               still works and dismisses the dialog on a match)."
     fi
 }
 
