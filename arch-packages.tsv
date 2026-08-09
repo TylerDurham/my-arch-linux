@@ -1,0 +1,182 @@
+# package	# repo	category	nixpkgs attr	description
+# ---------------------------------------------------------------------------
+# Arch Linux equivalents of nixos-packages.tsv.
+#
+# Fields are tab-delimited. Column 1 = pacman/AUR package name.
+# Everything after column 1 is prefixed with '#' so lines are shell-safe:
+#   cut -f1 arch-packages.tsv | grep -v '^#' | xargs -r yay -S --needed
+#
+# Repo column values:
+#   core      official [core] repo
+#   extra     official [extra] repo ([community] was merged into it in 2023)
+#   multilib  official [multilib] repo; must be uncommented in /etc/pacman.conf
+#   AUR       Arch User Repository; needs yay (install.d/yay.sh)
+#   none      no Arch equivalent - the line is commented out
+#
+# NOTE: Arch has no "main" repo - the base repo is [core].
+# Resolved against the core/extra sync DBs and the AUR RPC.
+# ---------------------------------------------------------------------------
+
+# === boot / console ========================================================
+terminus-font	# extra	boot	terminus_font	Bitmap console font (ter-132n) for the TTY
+linux	# core	boot	linuxPackages_latest	Latest mainline kernel package set [Arch ships mainline as 'linux'; linux-lts is the LTS option]
+plymouth-themes-adi1090x-git	# AUR	boot	adi1090x-plymouth-themes	Plymouth boot splash themes (built with only the 'lone' theme)
+plymouth	# extra	boot	plymouth	Graphical boot splash daemon
+systemd	# core	boot	systemd-boot	EFI bootloader (enabled via boot.loader.systemd-boot) [part of the systemd package, not standalone]
+edk2-ovmf	# extra	boot	OVMF	UEFI firmware; symlinked to /usr/share/OVMF for Claude Cowork [Arch name is edk2-ovmf]
+virtiofsd	# extra	virt	virtiofsd	virtio-fs daemon; symlinked to /usr/libexec for Claude Cowork
+
+# === shell / CLI ===========================================================
+zsh	# extra	shell	zsh	Z shell; login shell for user dtd
+bash	# core	shell	bash	Bash shell, configured via home-manager
+starship	# extra	shell	starship	Fast, customizable cross-shell prompt
+zoxide	# extra	shell	zoxide	Smarter cd that learns frequently used directories
+fzf	# extra	shell	fzf	Command-line fuzzy finder
+bat	# extra	cli	bat	cat clone with syntax highlighting and git integration
+lsd	# extra	cli	lsd	Modern ls replacement with icons and colors
+tree	# extra	cli	tree	Recursive directory listing as a tree
+ripgrep	# extra	cli	ripgrep	Fast recursive grep alternative (rg)
+jq	# extra	cli	jq	Command-line JSON processor
+curl	# core	cli	curl	Transfer data via URLs
+wget	# extra	cli	wget	Command-line file downloader
+gettext	# core	cli	envsubst	Environment-variable substitution in text (gettext) [provided by gettext]
+gzip	# core	cli	gzip	GNU compression utility
+unzip	# extra	cli	unzip	ZIP archive extractor
+stow	# extra	cli	stow	Symlink farm manager for dotfiles
+tmux	# extra	cli	tmux	Terminal multiplexer
+ncdu	# extra	cli	ncdu	NCurses disk usage analyzer
+btop	# extra	cli	btop	Resource monitor (CPU/mem/disk/net)
+inotify-tools	# extra	cli	inotify-tools	Filesystem event monitoring utilities
+yazi	# extra	cli	yazi	Fast terminal file manager
+imagemagick	# extra	cli	imagemagick	Image manipulation toolkit (convert/magick)
+claude-code	# AUR	cli	claude-code	Anthropic Claude Code CLI agent
+
+# === editors ===============================================================
+neovim	# extra	editor	neovim	Extensible terminal text editor (default $EDITOR)
+vim	# extra	editor	vim	Classic terminal text editor
+# nix-ld	# none	editor	nix-ld	Dynamic-linker shim so Mason can install stylua in Neovim [NixOS-specific shim; unnecessary on Arch, which has a standard FHS dynamic linker]
+
+# === terminals =============================================================
+ghostty	# extra	terminal	ghostty	GPU-accelerated terminal emulator
+kitty	# extra	terminal	kitty	GPU-accelerated terminal emulator
+xdg-terminal-exec	# AUR	terminal	xdg-terminal-exec	XDG default-terminal launcher spec implementation
+
+# === wayland / hyprland ====================================================
+hyprland	# extra	wayland	hyprland	Wayland tiling compositor (XWayland enabled)
+xorg-xwayland	# extra	wayland	xwayland	X11 compatibility server for Wayland [Arch name is xorg-xwayland]
+hypridle	# extra	wayland	hypridle	Idle daemon for Hyprland (triggers lock/sleep)
+hyprlock	# extra	wayland	hyprlock	GPU-accelerated screen locker for Hyprland
+hyprlauncher	# extra	wayland	hyprlauncher	Application launcher built for Hyprland
+hyprshutdown	# extra	wayland	hyprshutdown	Power menu / shutdown dialog for Hyprland
+hyprsunset	# extra	wayland	hyprsunset	Blue-light filter for Hyprland
+hyprpolkitagent	# extra	wayland	hyprpolkitagent	Polkit authentication agent for Hyprland (user service)
+waybar	# extra	wayland	waybar	Highly customizable Wayland status bar
+awww	# extra	wayland	swww	Wayland wallpaper daemon with transitions [upstream renamed swww to awww]
+rofi	# extra	wayland	rofi	Application launcher and window switcher
+swaync	# extra	wayland	swaynotificationcenter	Notification center for wlroots compositors
+swayosd	# extra	wayland	swayosd	On-screen display for volume/brightness
+grimblast-git	# AUR	wayland	grimblast	Hyprland screenshot tool (wraps grim + slurp)
+wl-clipboard	# extra	wayland	wl-clipboard	Wayland clipboard utilities (wl-copy/wl-paste)
+xdg-desktop-portal-hyprland	# extra	wayland	xdg-desktop-portal-hyprland	XDG desktop portal backend for Hyprland
+xdg-desktop-portal-gtk	# extra	wayland	xdg-desktop-portal-gtk	GTK XDG desktop portal backend
+xdg-utils	# extra	wayland	xdg-utils	Desktop integration helpers (xdg-open)
+libnotify	# extra	wayland	libnotify	Desktop notification library (notify-send)
+libappindicator	# extra	wayland	libappindicator-gtk3	System tray indicator support for GTK apps [libappindicator provides libappindicator-gtk3]
+brightnessctl	# extra	wayland	brightnessctl	Screen and keyboard brightness control
+
+# === desktop / GNOME bits ==================================================
+nautilus	# extra	desktop	nautilus	GTK file manager
+gnome-calculator	# extra	desktop	gnome-calculator	GNOME calculator
+gnome-keyring	# extra	desktop	gnome-keyring	Secret Service provider (org.freedesktop.secrets)
+libsecret	# core	desktop	libsecret	Keyring access library for GNOME secrets
+dconf	# extra	desktop	dconf	GSettings configuration backend
+nwg-look	# extra	desktop	nwg-look	GTK theme switcher for wlroots compositors
+gvfs	# extra	desktop	gvfs	Virtual filesystem for GNOME (trash, mtp, network mounts)
+pavucontrol	# extra	desktop	pavucontrol	PulseAudio/PipeWire volume control GUI
+
+# === themes / fonts ========================================================
+ttf-jetbrains-mono-nerd	# extra	fonts	nerd-fonts.jetbrains-mono	Monospace font patched with icon glyphs [one font of many in Arch's nerd-fonts meta package]
+otf-san-francisco	# AUR	fonts	sf-pro-fonts	Apple SF Pro Display (local derivation, fonts/sf-pro) [also bundled locally in install.d/fonts/sf-pro]
+# biorhyme-fonts	# none	fonts	biorhyme-fonts	BioRhyme display font (local derivation, fonts/bio-rhyme) [no Arch package; bundled locally in install.d/fonts/bio-rhyme]
+ttf-special-elite	# AUR	fonts	special-elite-font	Vintage typewriter font (local derivation, fonts/special-elite) [also bundled locally in install.d/fonts/special-elite]
+graphite-gtk-theme	# AUR	theme	graphite-gtk-theme	GTK theme, orange/dark/rimless variant [also built from source by install.d/gtk-theme.sh]
+tela-circle-icon-theme-dracula-git	# AUR	theme	tela-circle-icon-theme	Tela circle dark icon theme [also built from source by install.d/gtk-icon-theme.sh]
+
+# === media =================================================================
+mpv	# extra	media	mpv	General-purpose media player
+vlc	# extra	media	vlc	Versatile media player
+imv	# extra	media	imv	Lightweight Wayland image viewer
+pinta	# extra	media	pinta	Simple raster image editor
+playerctl	# extra	media	playerctl	MPRIS media player controller
+spotify	# AUR	media	spotify	Music streaming client
+plex-desktop	# AUR	media	plex-desktop	Plex media player desktop app
+plexamp-appimage	# AUR	media	plexamp	Plex music player
+
+# === applications ==========================================================
+brave-bin	# AUR	apps	brave	Chromium browser, wrapped with --password-store=basic
+claude-desktop	# AUR	apps	claude-desktop	Official Claude desktop app (local derivation from Anthropic .deb)
+obsidian	# extra	apps	obsidian	Markdown knowledge base / note-taking
+signal-desktop	# extra	apps	signal-desktop	Encrypted messaging client
+dropbox	# AUR	apps	dropbox	Dropbox sync daemon (run as a user systemd service)
+nautilus-dropbox	# AUR	apps	dropbox-cli	Dropbox CLI + Nautilus extension and sync emblems [nautilus-dropbox provides the dropbox CLI and the Nautilus extension]
+
+# === development ===========================================================
+gcc	# core	dev	gcc	GNU C/C++ compiler toolchain
+make	# core	dev	gnumake	GNU make build tool [Arch name is make]
+just	# extra	dev	just	Command runner (justfile)
+mise	# extra	dev	mise	Polyglot dev-tool version manager (programs.mise)
+uv	# extra	dev	uv	Fast Python package/project manager (also listed under python)
+tree-sitter	# extra	dev	tree-sitter	Incremental parsing library and CLI
+nixd	# AUR	dev	nixd	Nix language server
+hugo	# extra	dev	hugo	Static site generator
+stylua	# extra	dev	stylua	Lua code formatter
+github-cli	# extra	dev	github-cli	GitHub CLI (gh)
+grc	# extra	dev	grc	Generic colouriser for command output
+
+# --- go ---
+go	# extra	dev-go	go	Go compiler and toolchain
+gopls	# extra	dev-go	gopls	Go language server
+go-tools	# extra	dev-go	gotools	Supplementary Go tools (goimports, etc.) [Arch name is go-tools]
+
+# --- node ---
+nodejs	# extra	dev-node	nodejs	Node.js runtime
+bun	# extra	dev-node	bun	Bun JavaScript runtime and package manager
+prettier	# extra	dev-node	prettier	Opinionated code formatter
+
+# --- python ---
+python	# core	dev-python	python3	CPython 3 interpreter [Arch name is python; python3 is a symlink]
+python-black	# extra	dev-python	black	Python code formatter
+python-isort	# extra	dev-python	isort	Python import sorter
+
+# === version control =======================================================
+git	# extra	vcs	git	Distributed version control, SSH-signed commits via 1Password
+git-delta	# extra	vcs	delta	Syntax-highlighting pager for git diffs [Arch name is git-delta]
+lazygit	# extra	vcs	lazygit	Terminal UI for git
+
+# === containers ============================================================
+docker	# extra	container	docker	Container runtime (rootless, weekly autoprune)
+lazydocker	# extra	container	lazydocker	Terminal UI for Docker
+
+# === gaming ================================================================
+steam	# multilib	gaming	steam	Steam client with Proton, remote play firewall opened [needs [multilib] enabled in /etc/pacman.conf]
+gamescope	# extra	gaming	gamescope	Micro-compositor for fullscreen/scaling/FPS limiting
+gamemode	# extra	gaming	gamemode	CPU governor and process priority tweaks while gaming
+mangohud	# extra	gaming	mangohud	In-game FPS/frametime/temperature overlay
+protonup-qt	# AUR	gaming	protonup-qt	Manage Proton-GE builds
+
+# === audio / bluetooth =====================================================
+pipewire	# extra	audio	pipewire	Audio server with PulseAudio compatibility [add pipewire-pulse + wireplumber for the PulseAudio-compatible setup]
+bluez	# extra	bluetooth	bluez	Bluetooth protocol stack (hardware.bluetooth)
+blueman	# extra	bluetooth	blueman	GTK Bluetooth manager and applet
+
+# === security ==============================================================
+1password-cli	# AUR	security	_1password	1Password CLI (provides op-ssh-sign for commit signing) [1password-cli provides op / op-ssh-sign]
+1password	# AUR	security	_1password-gui	1Password desktop app, polkit owner dtd
+fprintd	# extra	security	fprintd	Fingerprint auth daemon (sudo, polkit, hyprlock, 1Password)
+openssh	# core	security	openssh	SSH server, key-only auth, root login prohibited
+
+# === networking / system services ==========================================
+networkmanager	# extra	network	networkmanager	Network connection manager
+avahi	# extra	network	avahi	mDNS/DNS-SD service discovery (nssmdns4)
+power-profiles-daemon	# extra	system	power-profiles-daemon	Power profile switching daemon
+libinput	# extra	system	libinput	Input device handling for Wayland
