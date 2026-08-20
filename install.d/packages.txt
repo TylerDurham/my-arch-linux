@@ -1,4 +1,5 @@
 bat
+grimblast
 brightnessctl
 btop
 flatpak
@@ -8,6 +9,9 @@ hyprland
 hypridle
 hyprlock
 hyprsunset
+libnotify
+grim 
+slurp
 hyprpolkitagent
 hyprshutdown
 jq
@@ -26,5 +30,7 @@ ttf-jetbrains-mono-nerd
 waybar
 which
 wl-clipboard
+unzip
 xdg-user-dirs
 zsh
+zip
