@@ -16,7 +16,7 @@
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PACKAGE_LIST="${AUR_PACKAGE_LIST:-${SCRIPT_DIR}/../aur-packages.md}"
+readonly PACKAGE_LIST="${AUR_PACKAGE_LIST:-${SCRIPT_DIR}/aur-packages.txt}"
 
 PACKAGES=()
 
