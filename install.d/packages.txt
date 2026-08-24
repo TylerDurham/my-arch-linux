@@ -1,35 +1,38 @@
-bat
-brightnessctl
-btop
-flatpak
-fzf
-git
-grim 
-hypridle
-hyprland
-hyprlock
-hyprpolkitagent
-hyprshutdown
-hyprsunset
-imagemagick
-jq
-libnotify
-lsd
-matugen
-neofetch
-neovim
-rofi
-slurp
-stow
-swaync
-swayosd
-tmux
-tree
-ttf-jetbrains-mono-nerd
-unzip
-waybar
-which
-wl-clipboard
-xdg-user-dirs
-zip
-zsh
+bat                     # cat clone with syntax highlighting and git integration
+bash-completion         # programmable tab-completion for the bash shell
+brightnessctl           # lightweight CLI for reading/setting display & LED brightness
+btop                    # resource monitor (CPU, memory, disks, network, processes)
+flatpak                 # sandboxed application runtime and distribution framework
+fzf                     # command-line fuzzy finder, used for interactive filtering
+git                     # distributed version control system
+grim                    # screenshot capture utility for Wayland compositors
+hypridle                # Hyprland idle daemon (dims, locks, or suspends on timeout)
+hyprland                # dynamic tiling Wayland compositor - the desktop itself
+hyprlock                # Hyprland's GPU-accelerated screen locker
+hyprpolkitagent         # polkit authentication agent (GUI prompts for privileged actions)
+hyprshutdown            # graceful shutdown/reboot/logout helper for Hyprland
+hyprsunset              # blue-light filter / colour temperature control for Hyprland
+imagemagick             # image conversion and manipulation toolkit (convert, magick)
+jq                      # command-line JSON processor
+lazygit                 # terminal UI for git
+lazydocker              # terminal UI for docker and docker compose
+libnotify               # library + notify-send CLI for desktop notifications
+lsd                     # modern ls replacement with colours and icons
+matugen                 # generates Material You colour schemes from a wallpaper
+fastfetch               # fast system info / fetch tool (neofetch replacement)
+neovim                  # hyperextensible Vim-based text editor
+rofi                    # application launcher, window switcher and dmenu replacement
+slurp                   # interactive region selector for Wayland (pairs with grim)
+stow                    # GNU Stow - symlink farm manager, used to deploy the dotfiles
+swaync                  # GTK notification daemon and notification centre
+swayosd                 # on-screen display for volume, brightness and caps-lock
+tmux                    # terminal multiplexer (persistent sessions, splits, windows)
+tree                    # prints directory contents as an indented tree
+ttf-jetbrains-mono-nerd # JetBrains Mono patched with Nerd Font glyphs/icons
+unzip                   # extract .zip archives
+waybar                  # highly customizable status bar for Wayland compositors
+which                   # shows the full path of a command found on $PATH
+wl-clipboard            # wl-copy / wl-paste clipboard utilities for Wayland
+xdg-user-dirs           # creates and manages ~/Desktop, ~/Downloads, ~/Music, etc.
+zip                     # create and modify .zip archives
+zsh                     # Z shell - the login/interactive shell for this setup
