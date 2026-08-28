@@ -1,4 +1,11 @@
-brave-bin
-grimblast
-spotify
 1password
+plex-desktop	# AUR	media	plex-desktop	Plex media player desktop app
+plexamp-bin
+brave-bin
+dropbox	# AUR	apps	dropbox	Dropbox sync daemon (run as a user systemd service)
+dropbox-cli
+grimblast
+nautilus-dropbox	# AUR	apps	dropbox-cli	Dropbox CLI + Nautilus extension and sync emblems [nautilus-dropbox provides the dropbox CLI and the Nautilus extension]
+obsidian	# extra	apps	obsidian	Markdown knowledge base / note-taking
+signal-desktop	# extra	apps	signal-desktop	Encrypted messaging client
+spotify
