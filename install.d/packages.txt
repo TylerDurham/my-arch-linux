@@ -1,10 +1,11 @@
+
+awww	                  # extra	wayland	swww	Wayland wallpaper daemon with transitions [upstream renamed swww to awww]
 bat                     # cat clone with syntax highlighting and git integration
 bash-completion         # programmable tab-completion for the bash shell
 brightnessctl           # lightweight CLI for reading/setting display & LED brightness
 btop                    # resource monitor (CPU, memory, disks, network, processes)
 flatpak                 # sandboxed application runtime and distribution framework
 fzf                     # command-line fuzzy finder, used for interactive filtering
-git                     # distributed version control system
 grim                    # screenshot capture utility for Wayland compositors
 hypridle                # Hyprland idle daemon (dims, locks, or suspends on timeout)
 hyprland                # dynamic tiling Wayland compositor - the desktop itself
@@ -36,3 +37,57 @@ wl-clipboard            # wl-copy / wl-paste clipboard utilities for Wayland
 xdg-user-dirs           # creates and manages ~/Desktop, ~/Downloads, ~/Music, etc.
 zip                     # create and modify .zip archives
 zsh                     # Z shell - the login/interactive shell for this setup
+
+# === media =================================================================
+mpv	                    # extra	media	mpv	General-purpose media player
+vlc	                    # extra	media	vlc	Versatile media player
+imv	                    # extra	media	imv	Lightweight Wayland image viewer
+pinta	                  # extra	media	pinta	Simple raster image editor
+playerctl	              # extra	media	playerctl	MPRIS media player controller
+
+# === desktop / GNOME bits ==================================================
+nautilus	              # extra	desktop	nautilus	GTK file manager
+gnome-calculator	      # extra	desktop	gnome-calculator	GNOME calculator
+gnome-keyring	          # extra	desktop	gnome-keyring	Secret Service provider (org.freedesktop.secrets)
+libsecret	              # core	desktop	libsecret	Keyring access library for GNOME secrets
+dconf	                  # extra	desktop	dconf	GSettings configuration backend
+nwg-look	              # extra	desktop	nwg-look	GTK theme switcher for wlroots compositors
+gvfs	                  # extra	desktop	gvfs	Virtual filesystem for GNOME (trash, mtp, network mounts)
+pavucontrol	            # extra	desktop	pavucontrol	PulseAudio/PipeWire volume control GUI
+
+# === version control =======================================================
+git	                    # extra	vcs	git	Distributed version control, SSH-signed commits via 1Password
+git-delta	              # extra	vcs	delta	Syntax-highlighting pager for git diffs [Arch name is git-delta]
+lazygit	                # extra	vcs	lazygit	Terminal UI for git
+
+# === security ==============================================================
+fprintd	                # extra	security	fprintd	Fingerprint auth daemon (sudo, polkit, hyprlock, 1Password)
+openssh	                # core	security	openssh	SSH server, key-only auth, root login prohibited
+
+# === development ===========================================================
+gcc	# core	dev	gcc	GNU C/C++ compiler toolchain
+make	# core	dev	gnumake	GNU make build tool [Arch name is make]
+just	# extra	dev	just	Command runner (justfile)
+mise	# extra	dev	mise	Polyglot dev-tool version manager (programs.mise)
+uv	# extra	dev	uv	Fast Python package/project manager (also listed under python)
+tree-sitter	# extra	dev	tree-sitter	Incremental parsing library and CLI
+hugo	# extra	dev	hugo	Static site generator
+stylua	# extra	dev	stylua	Lua code formatter
+github-cli	# extra	dev	github-cli	GitHub CLI (gh)
+grc	# extra	dev	grc	Generic colouriser for command output
+
+# --- go ---
+go	# extra	dev-go	go	Go compiler and toolchain
+gopls	# extra	dev-go	gopls	Go language server
+go-tools	# extra	dev-go	gotools	Supplementary Go tools (goimports, etc.) [Arch name is go-tools]
+
+# --- node ---
+nodejs	# extra	dev-node	nodejs	Node.js runtime
+bun	# extra	dev-node	bun	Bun JavaScript runtime and package manager
+prettier	# extra	dev-node	prettier	Opinionated code formatter
+
+# --- python ---
+python	# core	dev-python	python3	CPython 3 interpreter [Arch name is python; python3 is a symlink]
+python-black	# extra	dev-python	black	Python code formatter
+python-isort	# extra	dev-python	isort	Python import sorter
+
