@@ -1,22 +1,22 @@
 #!/usr/bin/env bash
 #
-# aur-packages.sh - install (or remove) the AUR packages listed in aur-packages.md
+# packages.sh - install (or remove) the repo packages listed in packages.txt
 #
 # Usage:
-#   ./aur-packages.sh                  install every package in the list
-#   ./aur-packages.sh -y|--no-confirm  install without the PKGBUILD review prompts
-#   ./aur-packages.sh -r|--revert      uninstall every package in the list
-#   ./aur-packages.sh -h|--help        show this help
+#   ./packages.sh                  install every package in the list
+#   ./packages.sh -y|--no-confirm  install without pacman's confirmation prompt
+#   ./packages.sh -r|--revert      uninstall every package in the list
+#   ./packages.sh -h|--help        show this help
 #
-# By default this runs yay's diff/edit menus so you review each PKGBUILD before
-# it is built. AUR packages are arbitrary shell scripts that run on your
-# machine - read them. Use --no-confirm only for unattended re-runs of a list
-# you have already vetted.
+# These come from the official repositories, so pacman installs them directly
+# and no PKGBUILD review is involved. By default pacman prints the transaction
+# and asks before committing to it; use --no-confirm for unattended re-runs of
+# a list you have already vetted.
 
 set -euo pipefail
 
 readonly SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-readonly PACKAGE_LIST="${AUR_PACKAGE_LIST:-${SCRIPT_DIR}/packages.txt}"
+readonly PACKAGE_LIST="${PACKAGE_LIST:-${SCRIPT_DIR}/packages.txt}"
 
 PACKAGES=()
 
@@ -38,7 +38,7 @@ check_environment() {
         || die "pacman not found - this script only supports Arch-based systems."
 
     [[ $EUID -ne 0 ]] \
-        || die "Do not run this script as root; yay refuses to build as root."
+        || die "Do not run this script as root; it calls sudo where needed."
 }
 
 is_installed() {
@@ -81,11 +81,9 @@ install_packages() {
     info "Installing from the repo: ${missing[*]}"
 
     if [[ $no_confirm -eq 1 ]]; then
-        warn "Skipping PKGBUILD review (--no-confirm)."
         sudo pacman -S --needed --noconfirm "${missing[@]}"
     else
-        info "Pacman will show you each PKGBUILD and its diff before building."
-        pacman -S --needed --diffmenu --editmenu "${missing[@]}"
+        sudo pacman -S --needed "${missing[@]}"
     fi
 
     info "Done."
