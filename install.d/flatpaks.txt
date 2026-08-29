@@ -1,3 +1,3 @@
-flatpak run tv.plex.PlexDesktop
-flatpak install flathub com.plexamp.Plexamp
-flatpak install flathub com.github.tchx84.Flatseal
+tv.plex.PlexDesktop            # Plex media client
+com.plexamp.Plexamp            # Plexamp music player
+com.github.tchx84.Flatseal     # GUI for reviewing and editing flatpak permissions

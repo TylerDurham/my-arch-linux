@@ -29,6 +29,7 @@ Set `DEBUG=1` in the environment for verbose logging.
 | `claude-desktop` | build and install Anthropic's Claude desktop app |
 | `docker` | install (or remove) Docker, rootful or rootless |
 | `fingerprint` | set up a fingerprint reader and wire it into unlock prompts |
+| `flatpaks` | install (or remove) the flatpaks listed in `flatpaks.txt` |
 | `fonts` | install (or remove) the fonts bundled in `install.d/fonts` |
 | `gtk-icon-theme` | install (or remove) the Tela-circle icon theme |
 | `gtk-theme` | install (or remove) the Graphite GTK theme |
@@ -46,11 +47,13 @@ the environment.
 
 | Variable | Module | Does |
 | --- | --- | --- |
-| `NO_CONFIRM=1` | `packages`, `aur-packages`, `audio`, `thunderbolt`, `kvm` | skip pacman's prompt and yay's PKGBUILD review |
+| `NO_CONFIRM=1` | `packages`, `aur-packages`, `audio`, `thunderbolt`, `kvm`, `flatpaks` | skip pacman's prompt and yay's PKGBUILD review |
 | `QEMU_FLAVOR` | `kvm` | `qemu-full` to emulate every architecture, not just this one |
 | `FORCE=1` | `gtk-theme`, `gtk-icon-theme` | rebuild a theme that is already installed |
 | `PACKAGE_LIST` | `packages` | read a different package list |
 | `AUR_PACKAGE_LIST` | `aur-packages` | read a different AUR package list |
+| `FLATPAK_LIST` | `flatpaks` | read a different flatpak list |
+| `SCOPE=user` | `flatpaks` | install into `~/.local/share/flatpak` instead of system-wide |
 | `FINGERS` | `fingerprint` | fingers to enroll, space separated |
 | `ENROLL_ONLY=1` | `fingerprint` | (re-)enroll fingers, leave PAM alone |
 | `WIRE_LOGIN=1` | `fingerprint` | also wire up the SDDM greeter |
@@ -81,7 +84,7 @@ install.d/              one module per piece of the system
 install.d/module.sh     template for a new module
 install.d/packages.txt  repo packages
 install.d/aur-packages.txt
-install.d/flatpaks.txt
+install.d/flatpaks.txt  flatpak apps
 install.d/fonts/        fonts installed by the fonts module
 dotfiles/
 arch-packages.tsv       package inventories
