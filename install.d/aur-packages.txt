@@ -1,6 +1,4 @@
 1password
-plex-desktop	# AUR	media	plex-desktop	Plex media player desktop app
-plexamp-bin
 brave-bin
 dropbox	# AUR	apps	dropbox	Dropbox sync daemon (run as a user systemd service)
 dropbox-cli
