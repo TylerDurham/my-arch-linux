@@ -7,6 +7,7 @@
 #   ./install.sh -m|--module NAME...  run only the named modules (.sh optional)
 #   ./install.sh -s|--select          pick modules interactively with fzf
 #   ./install.sh -l|--list            list the available modules
+#   ./install.sh -u|--uninstall       uninstall module(s)
 #   ./install.sh -h|--help            show this help
 #
 # Each module in install.d/ is a standalone script setting up one piece of the
@@ -16,12 +17,13 @@
 set -euo pipefail
 
 # EXIT CODES
-EX_NOINPUT=66
+readonly EX_NOINPUT=66
 
 # GLOBALS
-MODULE_DIR="install.d"
-MODULE_PATH="$(realpath $(dirname $0))/$MODULE_DIR"
+readonly MODULE_DIR="install.d"
+readonly MODULE_PATH="$(realpath $(dirname $0))/$MODULE_DIR"
 MODULES=()
+UNINSTALL=0
 
 # --- logging ------------------------------------------------------------
 if [[ -t 2 ]]; then
@@ -39,10 +41,12 @@ _log() { printf '%s%s%s %s\n' "$2" "$1" "$LOG_RESET" "${*:3}" >&2; }
 
 debug() { [[ -n "${DEBUG:-}" ]] || return 0; _log [DEBUG] "$LOG_PURPLE" "$@"; }
 error() { _log [ERROR] "$LOG_RED"    "$@"; }
+die()   { echo ""; _log [FATAL] "$LOG_RED" "$@"; exit 1; }
 info()  { _log [INFO]  "$LOG_BLUE"   "$@"; }
 module() { _log "  󰕳" "$LOG_PURPLE" "$@"; }
 success() { _log  "$LOG_GREEN" "$@"; }
 warn()  { _log [WARN]  "$LOG_YELLOW" "$@"; }
+indent() { sed "s/^/$(printf '%*s' "${1:-4}" '')/" >&2; }
 # -------------------------------------------------------------------------
 
 usage() {
@@ -65,21 +69,30 @@ list_modules() {
   done
 }
 
-install_module() {
+process_module() {
   local module_path="$1"
 
   if [[ ! -f "$module_path" ]]; then
     warn "Module '$module_path' could not be found."
   else
-    module "Installing module '$module_path'..."
+    source "$module_path"
+    if [[ $UNINSTALL == 1 ]]; then
+      module "Uninstalling module '$module_path'..."
+      on_init
+      on_uninstall
+    else
+      module "Installing module '$module_path'..."
+      on_init
+      on_install
+    fi
   fi
 }
 
-install_modules() {
+process_modules() {
   local modules=("$@")
 
   for module in "${modules[@]}"; do 
-    install_module "$module"
+    process_module "$module"
   done
 }
 
@@ -98,17 +111,18 @@ while [[ "$#" -gt 0 ]]; do
             shift
         done
       ;;
+    -u|--uninstall) UNINSTALL=1; shift ;;
     *) break ;;
   esac
 done
 
 if [[ "${#MODULES[@]}" -gt 0 ]]; then
-  info "${#MODULES[@]} modules passed as args."
-  install_modules "${MODULES[@]}"
+  info "${#MODULES[@]} modules passed as args. Processing ${#MODULES[@]} modules..."
+  process_modules "${MODULES[@]}"
 else
-  info "No modules passed as args. Installing all modules..."
+  info "No modules passed as args. Processing all modules..."
   mapfile -t MODULES < <(list_modules 0)
-  install_modules "${MODULES[@]}"
+  process_modules "${MODULES[@]}"
 fi
 
 success "Done!"
