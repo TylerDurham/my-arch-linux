@@ -1,4 +1,6 @@
+# -------------------------------------------------------------------------------------------------
 # GLOBALS
+# -------------------------------------------------------------------------------------------------
 
 readonly CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"          # Current directory (relative to this file)
 readonly FONTS_SRC="${CWD}/fonts"                                     # Directory that contains fonts to be installed
@@ -15,6 +17,10 @@ FONT_FILES=()
 log() {
   debug "$*" 2>&1 | indent 4
 }
+
+# -------------------------------------------------------------------------------------------------
+# HOOKS
+# -------------------------------------------------------------------------------------------------
 
 # Called by source script. Initializes the module.
 on_init() {
@@ -43,6 +49,10 @@ on_uninstall() {
   log "$FUNCNAME: Rebuilding font cache..."
   refresh_font_cache
 }
+
+# -------------------------------------------------------------------------------------------------
+# CORE FUNCTIONS
+# -------------------------------------------------------------------------------------------------
 
 # Collect font paths relative to FONTS_SRC, e.g. "sf-pro/SF Pro Display Bold.otf".
 # Null-delimited throughout: several bundled fonts have spaces in their names.
