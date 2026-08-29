@@ -32,6 +32,7 @@ Set `DEBUG=1` in the environment for verbose logging.
 | `fonts` | install (or remove) the fonts bundled in `install.d/fonts` |
 | `gtk-icon-theme` | install (or remove) the Tela-circle icon theme |
 | `gtk-theme` | install (or remove) the Graphite GTK theme |
+| `kvm` | install (or remove) the KVM/QEMU virtualisation stack |
 | `packages` | install (or remove) the repo packages listed in `packages.txt` |
 | `thunderbolt` | install boltd, the Thunderbolt device manager |
 | `yay` | install (or remove) the yay AUR helper |
@@ -45,7 +46,8 @@ the environment.
 
 | Variable | Module | Does |
 | --- | --- | --- |
-| `NO_CONFIRM=1` | `packages`, `aur-packages`, `audio`, `thunderbolt` | skip pacman's prompt and yay's PKGBUILD review |
+| `NO_CONFIRM=1` | `packages`, `aur-packages`, `audio`, `thunderbolt`, `kvm` | skip pacman's prompt and yay's PKGBUILD review |
+| `QEMU_FLAVOR` | `kvm` | `qemu-full` to emulate every architecture, not just this one |
 | `FORCE=1` | `gtk-theme`, `gtk-icon-theme` | rebuild a theme that is already installed |
 | `PACKAGE_LIST` | `packages` | read a different package list |
 | `AUR_PACKAGE_LIST` | `aur-packages` | read a different AUR package list |
