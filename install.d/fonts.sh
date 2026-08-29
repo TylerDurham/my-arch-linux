@@ -104,7 +104,7 @@ refresh_font_cache() {
     $SUDO fc-cache -f >/dev/null
 }
 
-
+# Uninstall the fonts
 uninstall_fonts() {
     local removed=0
     local rel

@@ -34,7 +34,7 @@ if [[ -t 2 ]]; then
   LOG_RED=$'\033[31m'
   LOG_YELLOW=$'\033[33m'
 else
-  LOG_RESET='' LOG_BLUE='' LOG_GRAY='' LOG_YELLOW='' LOG_RED='' LOG_GREEN=''
+  LOG_RESET='' LOG_BLUE='' LOG_GREEN='' LOG_PURPLE='' LOG_RED='' LOG_YELLOW=''
 fi
 
 _log() { printf '%s%s%s %s\n' "$2" "$1" "$LOG_RESET" "${*:3}" >&2; }
@@ -71,20 +71,39 @@ list_modules() {
 
 process_module() {
   local module_path="$1"
+  local action="install"
+  local status=0
+
+  if [[ $UNINSTALL == 1 ]]; then
+    action="uninstall"
+  fi
 
   if [[ ! -f "$module_path" ]]; then
     warn "Module '$module_path' could not be found."
-  else
+    return
+  fi
+
+  module "${action^}ing module '$module_path'..."
+
+  # Each module is sourced in a subshell so its globals (readonly CWD and
+  # friends) and hook definitions cannot collide with the runner or leak into
+  # the module processed next.
+  (
+    local hook
+
     source "$module_path"
-    if [[ $UNINSTALL == 1 ]]; then
-      module "Uninstalling module '$module_path'..."
-      on_init
-      on_uninstall
-    else
-      module "Installing module '$module_path'..."
-      on_init
-      on_install
-    fi
+
+    for hook in on_init "on_${action}"; do
+      declare -F "$hook" >/dev/null \
+        || { error "Module '$module_path' does not define ${hook}()."; exit "$EX_NOINPUT"; }
+    done
+
+    on_init
+    "on_${action}"
+  ) || status=$?
+
+  if [[ $status -ne 0 ]]; then
+    die "Module '$module_path' failed with exit code ${status}."
   fi
 }
 
