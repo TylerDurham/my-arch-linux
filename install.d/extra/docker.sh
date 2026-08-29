@@ -120,11 +120,11 @@ install_packages() {
     done
 
     if [[ ${#missing[@]} -eq 0 ]]; then
-        info "Packages already present: $*"
+        log "Packages already present: $*"
         return
     fi
 
-    info "Installing packages: ${missing[*]}"
+    log "Installing packages: ${missing[*]}"
     if [[ "$helper" == "yay" ]]; then
         yay -S --needed --noconfirm "${missing[@]}"
     else
@@ -137,13 +137,13 @@ install_packages() {
 # hand-edit that docker-rootless-extras prints on install.
 ensure_subids() {
     if grep -q "^${USER}:" /etc/subuid 2>/dev/null && grep -q "^${USER}:" /etc/subgid 2>/dev/null; then
-        info "Sub-uid/sub-gid ranges already allocated for ${USER}."
+        log "Sub-uid/sub-gid ranges already allocated for ${USER}."
         return
     fi
 
     local range="${SUBID_START}-$((SUBID_START + SUBID_COUNT - 1))"
 
-    info "Allocating sub-uid/sub-gid range ${range} for ${USER}..."
+    log "Allocating sub-uid/sub-gid range ${range} for ${USER}..."
     sudo usermod --add-subuids "$range" --add-subgids "$range" "$USER"
 }
 
@@ -153,9 +153,9 @@ select_rootless_context() {
     local socket="unix:///run/user/$(id -u)/docker.sock"
 
     if docker context inspect "$CONTEXT_NAME" >/dev/null 2>&1; then
-        info "Docker context '${CONTEXT_NAME}' already exists."
+        log "Docker context '${CONTEXT_NAME}' already exists."
     else
-        info "Creating the '${CONTEXT_NAME}' docker context -> ${socket}"
+        log "Creating the '${CONTEXT_NAME}' docker context -> ${socket}"
         docker context create "$CONTEXT_NAME" --docker "host=${socket}" >/dev/null
     fi
 
@@ -163,7 +163,7 @@ select_rootless_context() {
 }
 
 install_prune_timer_rootless() {
-    info "Installing the weekly prune timer (user scope)..."
+    log "Installing the weekly prune timer (user scope)..."
 
     mkdir -p "$USER_UNIT_DIR"
 
@@ -199,7 +199,7 @@ EOF
 }
 
 install_prune_timer_rootful() {
-    info "Installing the weekly prune timer (system scope)..."
+    log "Installing the weekly prune timer (system scope)..."
 
     sudo tee "${SYSTEM_UNIT_DIR}/${PRUNE_UNIT}.service" >/dev/null <<EOF
 [Unit]
@@ -233,15 +233,15 @@ install_rootful() {
     install_packages pacman "${PKGS_REPO[@]}"
 
     if id -nG "$USER" | grep -qw docker; then
-        info "${USER} is already in the docker group."
+        log "User '${USER}' is already in the docker group."
     else
         warn "Members of the 'docker' group can trivially become root; ROOTLESS=1 avoids that."
-        info "Adding ${USER} to the docker group..."
+        log "Adding '${USER}' to the docker group..."
         sudo usermod -aG docker "$USER"
-        warn "Log out and back in for the new group membership to take effect."
+        warn "Log out and back in for the new group membership to take effect." | indent 4
     fi
 
-    info "Enabling the system daemon..."
+    log "Enabling the system daemon..."
     sudo systemctl enable --now docker.service
 
     if [[ $PRUNE -eq 1 ]]; then
@@ -262,17 +262,17 @@ install_rootless() {
     # Both daemons can coexist - they bind different sockets - but running the
     # system one alongside this is almost never what you want.
     if systemctl is-enabled docker.service >/dev/null 2>&1; then
-        warn "The system-wide docker.service is also enabled; disable it with:"
-        warn "   sudo systemctl disable --now docker.service docker.socket"
+        warn "The system-wide docker.service is also enabled; disable it with:" | indent 4
+        warn "   sudo systemctl disable --now docker.service docker.socket" | indent 4
     fi
 
     # Without lingering the daemon dies with your last session, taking any
     # restart-always containers with it.
-    info "Enabling lingering so the daemon survives logout..."
+    log "Enabling lingering so the daemon survives logout..."
     sudo loginctl enable-linger "$USER"
 
     # docker-rootless-extras ships the user units and prefers socket activation.
-    info "Starting the rootless daemon..."
+    log "Starting the rootless daemon..."
     systemctl --user daemon-reload
     systemctl --user enable --now docker.socket
 
@@ -285,7 +285,7 @@ install_rootless() {
         install_prune_timer_rootless
     fi
 
-    log "Done: Docker $(docker version --format '{{.Server.Version}}' 2>/dev/null) running rootless as ${USER}."
+    log "Done: Docker $(docker version --format '{{.Server.Version}}' 2>/dev/null) running rootless as '${USER}'."
 }
 
 # Tear down both modes: whichever one is not installed simply has nothing to do.
@@ -294,7 +294,7 @@ uninstall_rootless() {
 
     for unit in "${PRUNE_UNIT}.timer" docker.socket docker.service; do
         if systemctl --user is-enabled "$unit" >/dev/null 2>&1; then
-            info "Stopping user unit ${unit}..."
+            log "Stopping user unit ${unit}..."
             systemctl --user disable --now "$unit" >/dev/null 2>&1 || true
         fi
     done
@@ -302,12 +302,12 @@ uninstall_rootless() {
     for unit in "${PRUNE_UNIT}.service" "${PRUNE_UNIT}.timer"; do
         if [[ -f "${USER_UNIT_DIR}/${unit}" ]]; then
             rm -f "${USER_UNIT_DIR}/${unit}"
-            printf '   removed %s\n' "${USER_UNIT_DIR}/${unit}"
+            printf 'removed %s\n' "${USER_UNIT_DIR}/${unit}" | indent 4
         fi
     done
 
     if command -v docker >/dev/null 2>&1 && docker context inspect "$CONTEXT_NAME" >/dev/null 2>&1; then
-        info "Removing the '${CONTEXT_NAME}' docker context..."
+        log "Removing the '${CONTEXT_NAME}' docker context..."
         docker context use default >/dev/null 2>&1 || true
         docker context rm "$CONTEXT_NAME" >/dev/null 2>&1 || true
     fi
@@ -320,7 +320,7 @@ uninstall_rootful() {
 
     for unit in "${PRUNE_UNIT}.timer" docker.service docker.socket containerd.service; do
         if systemctl is-enabled "$unit" >/dev/null 2>&1; then
-            info "Stopping system unit ${unit}..."
+            log "Stopping system unit ${unit}..."
             sudo systemctl disable --now "$unit" >/dev/null 2>&1 || true
         fi
     done
@@ -328,12 +328,12 @@ uninstall_rootful() {
     for unit in "${PRUNE_UNIT}.service" "${PRUNE_UNIT}.timer"; do
         if [[ -f "${SYSTEM_UNIT_DIR}/${unit}" ]]; then
             sudo rm -f "${SYSTEM_UNIT_DIR}/${unit}"
-            printf '   removed %s\n' "${SYSTEM_UNIT_DIR}/${unit}"
+            printf 'removed %s\n' "${SYSTEM_UNIT_DIR}/${unit}" | indent 4
         fi
     done
 
     if id -nG "$USER" | grep -qw docker; then
-        info "Removing ${USER} from the docker group..."
+        log "Removing ${USER} from the docker group..."
         sudo gpasswd -d "$USER" docker >/dev/null
     fi
 
@@ -355,7 +355,7 @@ remove_packages() {
         return
     fi
 
-    info "Removing packages: ${installed[*]}"
+    log "Removing packages: ${installed[*]}"
     sudo pacman -Rns --noconfirm "${installed[@]}"
 }
 
@@ -366,8 +366,8 @@ uninstall_docker() {
 
     # Images and volumes are user data; deleting them silently on an uninstall
     # is not this module's call to make.
-    info "Left your image/volume data in place. To reclaim it:"
+    log "Left your image/volume data in place. To reclaim it:"
     printf '   rm -rf %s/docker\n' "${XDG_DATA_HOME:-${HOME}/.local/share}"
     printf '   sudo rm -rf /var/lib/docker /var/lib/containerd\n'
-    info "Left the sub-id ranges and lingering alone; podman and friends share them."
+    log "Left the sub-id ranges and lingering alone; podman and friends share them."
 }
