@@ -1,7 +1,7 @@
 # GLOBALS
 
 readonly CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"          # Current directory (relative to this file)
-readonly FONTS_SRC="${SCRIPT_DIR}/fonts"                              # Directory that contains fonts to be installed
+readonly FONTS_SRC="${CWD}/fonts"                                     # Directory that contains fonts to be installed
 readonly USER_FONT_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/fonts" # User font directory
 readonly SYSTEM_FONT_DIR="/usr/share/fonts"                           # System font directory
 readonly FONT_EXTENSIONS=(ttf otf ttc pfb pfm bdf pcf pcf.gz)         # Extensions fontconfig can actually consume.
