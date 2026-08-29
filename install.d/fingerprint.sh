@@ -1,17 +1,4 @@
-#!/usr/bin/env bash
-#
 # fingerprint.sh - set up a fingerprint reader and wire it into unlock prompts
-#
-# Usage:
-#   ./fingerprint.sh                    install fprintd, enroll a finger, wire up PAM
-#   ./fingerprint.sh -f|--finger NAME   enroll NAME instead of right-index-finger
-#                                       (repeatable; see --list-fingers)
-#   ./fingerprint.sh --list-fingers     print the finger names fprintd accepts
-#   ./fingerprint.sh --enroll-only      (re-)enroll fingers, leave PAM alone
-#   ./fingerprint.sh --login            also wire up the SDDM greeter (opt-in)
-#   ./fingerprint.sh -s|--status        report reader, enrollments and PAM state
-#   ./fingerprint.sh -r|--revert        unwire PAM and delete enrolled fingerprints
-#   ./fingerprint.sh -h|--help          show this help
 #
 # What gets wired where:
 #   sudo, polkit-1  pam_fprintd.so is added as 'sufficient' ahead of the password
@@ -19,23 +6,38 @@
 #                   works as fallback. polkit is what 1Password's "unlock using
 #                   system authentication service" goes through.
 #   hyprlock        needs no PAM change - it talks to fprintd over D-Bus itself
-#                   and is configured in hyprlock.conf. This script only checks.
+#                   and is configured in hyprlock.conf. This module only checks.
 #
 # system-auth and the TTY login stack are deliberately left alone: a mistake
 # there can lock you out of every authentication path at once.
+#
+# Environment knobs:
+#   FINGERS="right-index-finger left-thumb"   fingers to enroll (see list_fingers)
+#   ENROLL_ONLY=1                             (re-)enroll fingers, leave PAM alone
+#   WIRE_LOGIN=1                              also wire up the SDDM greeter (opt-in)
+#
+# show_status() reports the reader, enrollments and PAM state read-only. It has
+# no lifecycle hook of its own, so it only runs if something calls it; on_install
+# reports the same ground as it goes.
 
-set -euo pipefail
+# -------------------------------------------------------------------------------------------------
+# GLOBALS
+# -------------------------------------------------------------------------------------------------
 
-readonly PKGS=(fprintd)
-readonly DEFAULT_FINGER="right-index-finger"
+readonly CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)" # Current directory (relative to this file)
+readonly PKGS=(fprintd)                                      # Packages providing the fprintd stack
+readonly DEFAULT_FINGER="right-index-finger"                 # Enrolled unless FINGERS says otherwise
+readonly PAM_DIR="/etc/pam.d"                                # Where PAM stacks are read from
+readonly PAM_VENDOR_DIR="/usr/lib/pam.d"                     # Arch's stock PAM stacks
+readonly BAK_SUFFIX=".pre-fingerprint.bak"                   # Suffix for backed-up PAM stacks
+FINGERS="${FINGERS:-$DEFAULT_FINGER}"                        # Space-separated fingers to enroll
+ENROLL_ONLY="${ENROLL_ONLY:-0}"                              # Enroll only; do not touch PAM
+WIRE_LOGIN="${WIRE_LOGIN:-0}"                                # Also wire the SDDM greeter
 
-# Services whose PAM stack gets the fprintd line. sddm is appended by --login.
+# Services whose PAM stack gets the fprintd line. sddm is appended by WIRE_LOGIN.
 PAM_SERVICES=(sudo polkit-1)
 
-readonly PAM_DIR="/etc/pam.d"
-readonly PAM_VENDOR_DIR="/usr/lib/pam.d"
-readonly BAK_SUFFIX=".pre-fingerprint.bak"
-
+# The managed block written into each PAM stack, and the line inside it.
 readonly MARK_BEGIN="# >>> fingerprint.sh managed >>>"
 readonly MARK_END="# <<< fingerprint.sh managed <<<"
 readonly FPRINT_LINE="auth       sufficient   pam_fprintd.so"
@@ -49,23 +51,89 @@ readonly VALID_FINGERS=(
     right-thumb right-index-finger right-middle-finger right-ring-finger right-little-finger
 )
 
-# --- output helpers ----------------------------------------------------------
+# Fingers to enroll, split out of $FINGERS by on_init.
+FINGER_LIST=()
 
-info()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }
-warn()  { printf '\033[1;33m::\033[0m %s\n' "$*" >&2; }
-error() { printf '\033[1;31m::\033[0m %s\n' "$*" >&2; }
-die()   { error "$*"; exit 1; }
-
-usage() {
-    sed -n '3,25p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+# Logging helper.
+log() {
+  debug "$*" 2>&1 | indent 4
 }
 
-list_fingers() {
-    printf '%s\n' "${VALID_FINGERS[@]}"
+# -------------------------------------------------------------------------------------------------
+# HOOKS
+# -------------------------------------------------------------------------------------------------
+
+# Called by source script. Initializes the module.
+on_init() {
+  log "$FUNCNAME: Checking environment..."
+  check_environment
+
+  log "$FUNCNAME: Resolving fingers to enroll..."
+  resolve_fingers
+
+  [[ $WIRE_LOGIN -eq 1 ]] && PAM_SERVICES+=(sddm)
+
+  # Prime the sudo timestamp up front so the run does not stall on a password
+  # prompt in the middle of rewriting a PAM stack.
+  sudo -v
 }
 
-# --- checks ------------------------------------------------------------------
+# Called by source script. Installs the module.
+on_install() {
+  local svc
 
+  log "$FUNCNAME: Installing ${PKGS[*]}..."
+  install_packages
+
+  if [[ -n "$(enrolled_fingers)" && $ENROLL_ONLY -eq 0 ]]; then
+    info "Already enrolled: $(enrolled_fingers | paste -sd', ' -). Set ENROLL_ONLY=1 to add more."
+  else
+    log "$FUNCNAME: Enrolling ${FINGER_LIST[*]}..."
+    enroll_fingers "${FINGER_LIST[@]}"
+  fi
+
+  if [[ $ENROLL_ONLY -eq 1 ]]; then
+    info "ENROLL_ONLY=1; leaving PAM alone."
+    return
+  fi
+
+  verify_pam_module
+
+  warn "About to edit PAM. Keep this shell open and test in a second terminal;"
+  warn "revert with './install.sh -u -m fingerprint' if a prompt stops accepting"
+  warn "your password."
+
+  for svc in "${PAM_SERVICES[@]}"; do
+    pam_wire "$svc"
+  done
+
+  check_hyprlock
+  check_1password
+
+  info "Done. Test in this order: fprintd-verify, then 'sudo -k && sudo true', then 1Password."
+}
+
+# Called by source script. Uninstalls the module.
+on_uninstall() {
+  local svc
+
+  # Unwire sddm unconditionally: WIRE_LOGIN may have added it on a past run.
+  log "$FUNCNAME: Unwiring PAM..."
+  for svc in "${PAM_SERVICES[@]}" sddm; do
+    pam_unwire "$svc"
+  done
+
+  log "$FUNCNAME: Deleting enrollments..."
+  delete_enrollments
+
+  info "Reverted. fprintd is still installed; remove it with: sudo pacman -Rns fprintd"
+}
+
+# -------------------------------------------------------------------------------------------------
+# CORE FUNCTIONS
+# -------------------------------------------------------------------------------------------------
+
+# Check for pacman and sudo, and that we are not running as root.
 check_environment() {
     command -v pacman >/dev/null 2>&1 \
         || die "pacman not found - this script only supports Arch-based systems."
@@ -81,6 +149,10 @@ is_installed() {
     pacman -Qi "$1" >/dev/null 2>&1
 }
 
+list_fingers() {
+    printf '%s\n' "${VALID_FINGERS[@]}"
+}
+
 is_valid_finger() {
     local candidate="$1" finger
     for finger in "${VALID_FINGERS[@]}"; do
@@ -89,7 +161,20 @@ is_valid_finger() {
     return 1
 }
 
-# --- fprintd -----------------------------------------------------------------
+# Split $FINGERS into FINGER_LIST, rejecting names fprintd does not accept.
+resolve_fingers() {
+    local finger
+
+    read -ra FINGER_LIST <<<"$FINGERS"
+
+    [[ ${#FINGER_LIST[@]} -gt 0 ]] \
+        || die "FINGERS is empty; set it to one or more finger names."
+
+    for finger in "${FINGER_LIST[@]}"; do
+        is_valid_finger "$finger" \
+            || die "Unknown finger '${finger}'. Valid names: ${VALID_FINGERS[*]}"
+    done
+}
 
 install_packages() {
     local missing=()
@@ -164,7 +249,7 @@ delete_enrollments() {
     fprintd-delete "$USER"
 }
 
-# --- PAM ---------------------------------------------------------------------
+# --- PAM -----------------------------------------------------------------------------------------
 
 # Arch ships stock PAM stacks in /usr/lib/pam.d; a file in /etc/pam.d replaces
 # (does not merge with) the vendor one, so we seed from the vendor copy.
@@ -272,7 +357,7 @@ verify_pam_module() {
         || die "pam_fprintd.so is missing even though fprintd is installed; refusing to edit PAM."
 }
 
-# --- integrations we only report on -------------------------------------------
+# --- integrations we only report on ---------------------------------------------------------------
 
 check_hyprlock() {
     if ! is_installed hyprlock; then
@@ -345,7 +430,7 @@ check_1password() {
             ;;
         '')
             warn "1Password: no 'Sys auth status' line in the last 24h of logs, so"
-            warn "there is nothing to judge yet. Lock with Ctrl+L, then re-run --status."
+            warn "there is nothing to judge yet. Lock with Ctrl+L, then re-run show_status."
             ;;
         *)
             warn "1Password: system unlock reports '${sysauth}' despite the toggle being on."
@@ -384,8 +469,9 @@ check_1password() {
     fi
 }
 
-# --- status ------------------------------------------------------------------
+# --- status ---------------------------------------------------------------------------------------
 
+# Read-only report of reader, enrollments and PAM state. Not wired to a hook.
 show_status() {
     local svc fingers
 
@@ -419,82 +505,3 @@ show_status() {
     check_hyprlock
     check_1password
 }
-
-# --- entrypoint --------------------------------------------------------------
-
-main() {
-    local revert=0 status=0 enroll_only=0 login=0
-    local fingers=()
-    local svc
-
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -f|--finger)
-                [[ $# -ge 2 ]] || die "--finger needs a finger name (see --list-fingers)."
-                is_valid_finger "$2" || die "Unknown finger '$2'. See --list-fingers."
-                fingers+=("$2")
-                shift
-                ;;
-            --list-fingers) list_fingers; exit 0 ;;
-            --enroll-only)  enroll_only=1 ;;
-            --login)        login=1 ;;
-            -s|--status)    status=1 ;;
-            -r|--revert)    revert=1 ;;
-            -h|--help)      usage; exit 0 ;;
-            *)              error "Unknown option: $1"; usage >&2; exit 1 ;;
-        esac
-        shift
-    done
-
-    check_environment
-
-    [[ ${#fingers[@]} -gt 0 ]] || fingers=("$DEFAULT_FINGER")
-    [[ $login -eq 1 ]] && PAM_SERVICES+=(sddm)
-
-    if [[ $status -eq 1 ]]; then
-        show_status
-        exit 0
-    fi
-
-    # Prime the sudo timestamp up front so the run does not stall on a password
-    # prompt in the middle of rewriting a PAM stack.
-    sudo -v
-
-    if [[ $revert -eq 1 ]]; then
-        # Unwire sddm unconditionally: --login may have added it on a past run.
-        for svc in "${PAM_SERVICES[@]}" sddm; do
-            pam_unwire "$svc"
-        done
-        delete_enrollments
-        info "Reverted. fprintd is still installed; remove it with: sudo pacman -Rns fprintd"
-        exit 0
-    fi
-
-    install_packages
-
-    if [[ -n "$(enrolled_fingers)" && $enroll_only -eq 0 ]]; then
-        info "Already enrolled: $(enrolled_fingers | paste -sd', ' -). Use --enroll-only to add more."
-    else
-        enroll_fingers "${fingers[@]}"
-    fi
-
-    if [[ $enroll_only -eq 1 ]]; then
-        exit 0
-    fi
-
-    verify_pam_module
-
-    warn "About to edit PAM. Keep this shell open and test in a second terminal;"
-    warn "revert with '$0 --revert' if a prompt stops accepting your password."
-
-    for svc in "${PAM_SERVICES[@]}"; do
-        pam_wire "$svc"
-    done
-
-    check_hyprlock
-    check_1password
-
-    info "Done. Test in this order: fprintd-verify, then 'sudo -k && sudo true', then 1Password."
-}
-
-main "$@"
