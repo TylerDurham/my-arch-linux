@@ -1,37 +1,33 @@
-#!/usr/bin/env bash
-#
-# install-docker.sh - install (or remove) Docker
-#
-# Usage:
-#   ./install-docker.sh              install the system-wide daemon (rootful)
-#   ./install-docker.sh --rootless   run the daemon as your own user instead
-#   ./install-docker.sh --no-prune   skip the weekly "docker system prune" timer
-#   ./install-docker.sh -r|--revert  uninstall Docker and undo this script's changes
-#   ./install-docker.sh -h|--help    show this help
+# docker.sh - install (or remove) Docker
 #
 # Rootful is the default and needs your account in the `docker` group, which is
-# equivalent to passwordless root on this machine. --rootless runs dockerd as
+# equivalent to passwordless root on this machine. ROOTLESS=1 runs dockerd as
 # you inside a user namespace, so a container escape lands on an unprivileged
 # uid; it costs an AUR build, since docker-rootless-extras is not in [extra].
 #
-# Revert removes the packages and everything this script wrote, but never
+# Uninstall removes the packages and everything this module wrote, but never
 # deletes image/volume data; it prints the paths so you can decide.
+#
+# Environment knobs:
+#   ROOTLESS=1   run the daemon as your own user instead of system-wide
+#   PRUNE=0      skip the weekly "docker system prune" timer
 
-set -euo pipefail
+# -------------------------------------------------------------------------------------------------
+# GLOBALS
+# -------------------------------------------------------------------------------------------------
 
-readonly PKGS_REPO=(docker docker-buildx docker-compose)
+readonly CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"  # Current directory (relative to this file)
+readonly PKGS_REPO=(docker docker-buildx docker-compose)      # Repo packages for either mode
+readonly CONTEXT_NAME="rootless"                              # Docker context pointing at the user socket
+readonly SUBID_START=100000                                   # First sub-uid/sub-gid handed to the user
+readonly SUBID_COUNT=65536                                    # Conventional per-user sub-id range size
+ROOTLESS="${ROOTLESS:-0}"                                     # Run the daemon rootless instead of system-wide
+PRUNE="${PRUNE:-1}"                                           # Install the weekly prune timer
 
 # Not in [extra]. rootlesskit comes in as a hard dependency; slirp4netns is the
 # recommended network driver and fuse-overlayfs the storage fallback, both of
 # which the package only lists as optional.
 readonly PKGS_AUR=(docker-rootless-extras slirp4netns fuse-overlayfs)
-
-# 65536 sub-ids is the conventional per-user range; rootless docker maps
-# container uids into it via newuidmap(1).
-readonly SUBID_START=100000
-readonly SUBID_COUNT=65536
-
-readonly CONTEXT_NAME="rootless"
 
 # Prune weekly, but only reap what has gone a week untouched - a bare
 # `prune -af` would delete images you pulled this morning just because nothing
@@ -42,19 +38,47 @@ readonly PRUNE_UNIT="docker-prune"
 readonly USER_UNIT_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/systemd/user"
 readonly SYSTEM_UNIT_DIR="/etc/systemd/system"
 
-# --- output helpers ----------------------------------------------------------
-
-info()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }
-warn()  { printf '\033[1;33m::\033[0m %s\n' "$*" >&2; }
-error() { printf '\033[1;31m::\033[0m %s\n' "$*" >&2; }
-die()   { error "$*"; exit 1; }
-
-usage() {
-    sed -n '3,19p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+# Logging helper.
+log() {
+  debug "$*" 2>&1 | indent 4
 }
 
-# --- checks ------------------------------------------------------------------
+# -------------------------------------------------------------------------------------------------
+# HOOKS
+# -------------------------------------------------------------------------------------------------
 
+# Called by source script. Initializes the module.
+on_init() {
+  log "$FUNCNAME: Checking environment..."
+  check_environment
+
+  # Prime the sudo timestamp up front so the install does not stall on a
+  # password prompt halfway through.
+  sudo -v
+}
+
+# Called by source script. Installs the module.
+on_install() {
+  if [[ $ROOTLESS -eq 1 ]]; then
+    log "$FUNCNAME: Installing Docker rootless as ${USER}..."
+    install_rootless
+  else
+    log "$FUNCNAME: Installing Docker system-wide..."
+    install_rootful
+  fi
+}
+
+# Called by source script. Uninstalls the module.
+on_uninstall() {
+  log "$FUNCNAME: Removing Docker..."
+  uninstall_docker
+}
+
+# -------------------------------------------------------------------------------------------------
+# CORE FUNCTIONS
+# -------------------------------------------------------------------------------------------------
+
+# Check for pacman and sudo, and that we are not running as root.
 check_environment() {
     command -v pacman >/dev/null 2>&1 \
         || die "pacman not found - this script only supports Arch-based systems."
@@ -68,7 +92,7 @@ check_environment() {
 
 check_rootless_support() {
     [[ -n "${XDG_RUNTIME_DIR:-}" && -d "${XDG_RUNTIME_DIR}" ]] \
-        || die "XDG_RUNTIME_DIR is unset; log in on a normal systemd session or drop --rootless."
+        || die "XDG_RUNTIME_DIR is unset; log in on a normal systemd session or drop ROOTLESS=1."
 
     local max_userns="/proc/sys/user/max_user_namespaces"
     if [[ -r "$max_userns" && "$(< "$max_userns")" -eq 0 ]]; then
@@ -76,14 +100,12 @@ check_rootless_support() {
     fi
 
     command -v yay >/dev/null 2>&1 \
-        || die "yay not found; docker-rootless-extras is an AUR package. Run ./yay.sh first."
+        || die "yay not found; docker-rootless-extras is an AUR package. Run the yay module first."
 }
 
 is_installed() {
     pacman -Qi "$1" >/dev/null 2>&1
 }
-
-# --- install -----------------------------------------------------------------
 
 # install_packages <helper> <pkg>... - install only what is genuinely missing,
 # in one call. The helper is pacman or yay; yay declines to run under sudo, so
@@ -208,14 +230,12 @@ EOF
 }
 
 install_rootful() {
-    local prune="$1"
-
     install_packages pacman "${PKGS_REPO[@]}"
 
     if id -nG "$USER" | grep -qw docker; then
         info "${USER} is already in the docker group."
     else
-        warn "Members of the 'docker' group can trivially become root; --rootless avoids that."
+        warn "Members of the 'docker' group can trivially become root; ROOTLESS=1 avoids that."
         info "Adding ${USER} to the docker group..."
         sudo usermod -aG docker "$USER"
         warn "Log out and back in for the new group membership to take effect."
@@ -224,16 +244,14 @@ install_rootful() {
     info "Enabling the system daemon..."
     sudo systemctl enable --now docker.service
 
-    if [[ $prune -eq 1 ]]; then
+    if [[ $PRUNE -eq 1 ]]; then
         install_prune_timer_rootful
     fi
 
-    info "Done: Docker $(sudo docker version --format '{{.Server.Version}}' 2>/dev/null) running system-wide."
+    log "Done: Docker $(sudo docker version --format '{{.Server.Version}}' 2>/dev/null) running system-wide."
 }
 
 install_rootless() {
-    local prune="$1"
-
     check_rootless_support
 
     install_packages pacman "${PKGS_REPO[@]}"
@@ -263,17 +281,15 @@ install_rootless() {
     docker info >/dev/null 2>&1 \
         || die "The daemon did not come up; check 'systemctl --user status docker'."
 
-    if [[ $prune -eq 1 ]]; then
+    if [[ $PRUNE -eq 1 ]]; then
         install_prune_timer_rootless
     fi
 
-    info "Done: Docker $(docker version --format '{{.Server.Version}}' 2>/dev/null) running rootless as ${USER}."
+    log "Done: Docker $(docker version --format '{{.Server.Version}}' 2>/dev/null) running rootless as ${USER}."
 }
 
-# --- revert ------------------------------------------------------------------
-
 # Tear down both modes: whichever one is not installed simply has nothing to do.
-revert_rootless() {
+uninstall_rootless() {
     local unit
 
     for unit in "${PRUNE_UNIT}.timer" docker.socket docker.service; do
@@ -299,7 +315,7 @@ revert_rootless() {
     systemctl --user daemon-reload 2>/dev/null || true
 }
 
-revert_rootful() {
+uninstall_rootful() {
     local unit
 
     for unit in "${PRUNE_UNIT}.timer" docker.service docker.socket containerd.service; do
@@ -329,7 +345,9 @@ remove_packages() {
     local pkg
 
     for pkg in "${PKGS_AUR[@]}" "${PKGS_REPO[@]}"; do
-        is_installed "$pkg" && installed+=("$pkg")
+        if is_installed "$pkg"; then
+            installed+=("$pkg")
+        fi
     done
 
     if [[ ${#installed[@]} -eq 0 ]]; then
@@ -341,50 +359,15 @@ remove_packages() {
     sudo pacman -Rns --noconfirm "${installed[@]}"
 }
 
-revert_docker() {
-    revert_rootless
-    revert_rootful
+uninstall_docker() {
+    uninstall_rootless
+    uninstall_rootful
     remove_packages
 
     # Images and volumes are user data; deleting them silently on an uninstall
-    # is not this script's call to make.
+    # is not this module's call to make.
     info "Left your image/volume data in place. To reclaim it:"
     printf '   rm -rf %s/docker\n' "${XDG_DATA_HOME:-${HOME}/.local/share}"
     printf '   sudo rm -rf /var/lib/docker /var/lib/containerd\n'
     info "Left the sub-id ranges and lingering alone; podman and friends share them."
 }
-
-# --- entrypoint --------------------------------------------------------------
-
-main() {
-    local revert=0
-    local rootless=0
-    local prune=1
-
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -r|--revert) revert=1 ;;
-            --rootless)  rootless=1 ;;
-            --no-prune)  prune=0 ;;
-            -h|--help)   usage; exit 0 ;;
-            *)           error "Unknown option: $1"; usage >&2; exit 1 ;;
-        esac
-        shift
-    done
-
-    check_environment
-
-    # Prime the sudo timestamp up front so the install does not stall on a
-    # password prompt halfway through.
-    sudo -v
-
-    if [[ $revert -eq 1 ]]; then
-        revert_docker
-    elif [[ $rootless -eq 1 ]]; then
-        install_rootless "$prune"
-    else
-        install_rootful "$prune"
-    fi
-}
-
-main "$@"
