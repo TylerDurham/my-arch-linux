@@ -26,7 +26,6 @@ Set `DEBUG=1` in the environment for verbose logging.
 | --- | --- |
 | `audio` | install the audio pieces Arch does not pull in by default |
 | `aur-packages` | install (or remove) the AUR packages listed in `aur-packages.txt` |
-| `claude-desktop` | build and install Anthropic's Claude desktop app |
 | `docker` | install (or remove) Docker, rootful or rootless |
 | `fingerprint` | set up a fingerprint reader and wire it into unlock prompts |
 | `flatpaks` | install (or remove) the flatpaks listed in `flatpaks.txt` |
