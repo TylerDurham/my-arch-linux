@@ -1,53 +1,70 @@
-#!/usr/bin/env bash
-#
 # gtk-theme.sh - install (or remove) the Graphite GTK theme
-#
-# Usage:
-#   ./gtk-theme.sh              install the theme and select it via gsettings
-#   ./gtk-theme.sh -f|--force   reinstall even if the theme is already present
-#   ./gtk-theme.sh -r|--revert  uninstall the theme and reset gsettings
-#   ./gtk-theme.sh -h|--help    show this help
 #
 # The theme is built from vinceliuice/Graphite-gtk-theme, whose install.sh
 # writes the variants into ~/.local/share/themes and - because we pass
 # --libadwaita - also links the GTK4 assets into ~/.config/gtk-4.0.
+#
+# Set FORCE=1 in the environment to rebuild a theme that is already present.
 
-set -euo pipefail
+# -------------------------------------------------------------------------------------------------
+# GLOBALS
+# -------------------------------------------------------------------------------------------------
 
-readonly THEME_NAME="Graphite-Dark"
-readonly THEME_REPO="https://github.com/vinceliuice/Graphite-gtk-theme.git"
+readonly CWD="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"           # Current directory (relative to this file)
+readonly THEME_NAME="Graphite-Dark"                                     # Theme variant we install and select
+readonly THEME_REPO="https://github.com/vinceliuice/Graphite-gtk-theme.git" # Upstream theme repository
+readonly THEMES_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/themes"     # Where the variants are written
+readonly GTK4_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/gtk-4.0"         # Where --libadwaita links GTK4 assets
+FORCE="${FORCE:-0}"                                                     # Rebuild even if already installed
+BUILD_DIR=""                                                            # Temporary clone dir, set at build time
+
+# Arguments handed to the upstream install.sh.
 readonly THEME_ARGS=(--theme all --libadwaita -n Graphite -c dark --tweaks rimless black normal)
-readonly THEMES_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/themes"
-readonly GTK4_DIR="${XDG_CONFIG_HOME:-${HOME}/.config}/gtk-4.0"
 
-# nwg-look edits the same gsettings keys this script writes; it is the GUI
+# nwg-look edits the same gsettings keys this module writes; it is the GUI
 # escape hatch for tweaking the theme afterwards.
 readonly DEPS=(git nwg-look)
 
 # GTK4 files the upstream installer symlinks into place with --libadwaita.
 readonly GTK4_LINKS=(gtk.css gtk-dark.css assets)
 
-BUILD_DIR=""
-
-# --- output helpers ----------------------------------------------------------
-
-info()  { printf '\033[1;34m::\033[0m %s\n' "$*"; }
-warn()  { printf '\033[1;33m::\033[0m %s\n' "$*" >&2; }
-error() { printf '\033[1;31m::\033[0m %s\n' "$*" >&2; }
-die()   { error "$*"; exit 1; }
-
-usage() {
-    sed -n '3,13p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+# Logging helper.
+log() {
+  debug "$*" 2>&1 | indent 4
 }
 
-cleanup() {
-    if [[ -n "$BUILD_DIR" && -d "$BUILD_DIR" ]]; then
-        rm -rf "$BUILD_DIR"
-    fi
+# -------------------------------------------------------------------------------------------------
+# HOOKS
+# -------------------------------------------------------------------------------------------------
+
+# Called by source script. Initializes the module.
+on_init() {
+  log "$FUNCNAME: Checking environment..."
+  check_environment
 }
 
-# --- checks ------------------------------------------------------------------
+# Called by source script. Installs the module.
+on_install() {
+  # Prime the sudo timestamp up front so the build does not stall on a
+  # password prompt halfway through. Only the install path needs root; the
+  # uninstall path stays inside $HOME.
+  sudo -v
 
+  log "$FUNCNAME: Installing ${THEME_NAME} into ${THEMES_DIR}"
+  install_theme
+}
+
+# Called by source script. Uninstalls the module.
+on_uninstall() {
+  log "$FUNCNAME: Removing Graphite themes from ${THEMES_DIR}"
+  uninstall_theme
+}
+
+# -------------------------------------------------------------------------------------------------
+# CORE FUNCTIONS
+# -------------------------------------------------------------------------------------------------
+
+# Check for pacman and sudo, and that we are not running as root.
 check_environment() {
     command -v pacman >/dev/null 2>&1 \
         || die "pacman not found - this script only supports Arch-based systems."
@@ -63,7 +80,12 @@ is_installed() {
     pacman -Qi "$1" >/dev/null 2>&1
 }
 
-# --- install -----------------------------------------------------------------
+# Drop the temporary build directory, however we leave the module.
+cleanup() {
+    if [[ -n "$BUILD_DIR" && -d "$BUILD_DIR" ]]; then
+        rm -rf "$BUILD_DIR"
+    fi
+}
 
 install_dependencies() {
     local missing=()
@@ -93,11 +115,10 @@ apply_gsettings() {
     gsettings set org.gnome.desktop.interface color-scheme "prefer-dark"   # GTK4/libadwaita apps
 }
 
+# Clone the theme and run its installer, then select the variant.
 install_theme() {
-    local force="$1"
-
-    if [[ -d "${THEMES_DIR}/${THEME_NAME}" && $force -eq 0 ]]; then
-        info "Theme '${THEME_NAME}' is already installed. Use --force to rebuild it."
+    if [[ -d "${THEMES_DIR}/${THEME_NAME}" && $FORCE -eq 0 ]]; then
+        info "Theme '${THEME_NAME}' is already installed. Set FORCE=1 to rebuild it."
         apply_gsettings
         return
     fi
@@ -117,10 +138,8 @@ install_theme() {
         || die "Installer finished but ${THEMES_DIR}/${THEME_NAME} is missing; something went wrong."
 
     apply_gsettings
-    info "Done. Tweak further with nwg-look if you want."
+    log "Done. Tweak further with nwg-look if you want."
 }
-
-# --- revert ------------------------------------------------------------------
 
 # Drop the GTK4 symlinks, but only the ones still pointing at a Graphite theme:
 # a link the user re-pointed somewhere else is not ours to delete.
@@ -148,7 +167,8 @@ reset_gsettings() {
     esac
 }
 
-revert_theme() {
+# Remove every Graphite variant, its GTK4 links, and the gsettings selection.
+uninstall_theme() {
     local dirs=()
     local dir
 
@@ -172,33 +192,3 @@ revert_theme() {
     # color-scheme is a general dark-mode preference, not ours to undo.
     info "Left color-scheme set to $(gsettings get org.gnome.desktop.interface color-scheme 2>/dev/null || echo unknown)."
 }
-
-# --- entrypoint --------------------------------------------------------------
-
-main() {
-    local revert=0
-    local force=0
-
-    while [[ $# -gt 0 ]]; do
-        case "$1" in
-            -r|--revert) revert=1 ;;
-            -f|--force)  force=1 ;;
-            -h|--help)   usage; exit 0 ;;
-            *)           error "Unknown option: $1"; usage >&2; exit 1 ;;
-        esac
-        shift
-    done
-
-    check_environment
-
-    if [[ $revert -eq 1 ]]; then
-        revert_theme
-    else
-        # Prime the sudo timestamp up front so the build does not stall on a
-        # password prompt halfway through.
-        sudo -v
-        install_theme "$force"
-    fi
-}
-
-main "$@"
