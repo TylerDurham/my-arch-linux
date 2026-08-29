@@ -14,6 +14,7 @@ hyprpolkitagent         # polkit authentication agent (GUI prompts for privilege
 hyprshutdown            # graceful shutdown/reboot/logout helper for Hyprland
 hyprsunset              # blue-light filter / colour temperature control for Hyprland
 imagemagick             # image conversion and manipulation toolkit (convert, magick)
+iperf3                  # network utility for performance testing
 jq                      # command-line JSON processor
 lazygit                 # terminal UI for git
 lazydocker              # terminal UI for docker and docker compose
