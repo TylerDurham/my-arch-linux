@@ -54,6 +54,7 @@ dconf	                  # extra	desktop	dconf	GSettings configuration backend
 nwg-look	              # extra	desktop	nwg-look	GTK theme switcher for wlroots compositors
 gvfs	                  # extra	desktop	gvfs	Virtual filesystem for GNOME (trash, mtp, network mounts)
 pavucontrol	            # extra	desktop	pavucontrol	PulseAudio/PipeWire volume control GUI
+rtkit	                  # extra	desktop	rtkit	Realtime scheduling policy daemon (PipeWire needs it to avoid audio crackle)
 
 # === version control =======================================================
 git	                    # extra	vcs	git	Distributed version control, SSH-signed commits via 1Password

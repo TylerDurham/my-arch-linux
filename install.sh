@@ -27,19 +27,22 @@ MODULES=()
 if [[ -t 2 ]]; then
   LOG_RESET=$'\033[0m'
   LOG_BLUE=$'\033[34m'
-  LOG_YELLOW=$'\033[33m'
-  LOG_RED=$'\033[31m'
+  LOG_GREEN=$'\033[32m'
   LOG_PURPLE=$'\033[35m'
+  LOG_RED=$'\033[31m'
+  LOG_YELLOW=$'\033[33m'
 else
-  LOG_RESET='' LOG_BLUE='' LOG_GRAY='' LOG_YELLOW='' LOG_RED=''
+  LOG_RESET='' LOG_BLUE='' LOG_GRAY='' LOG_YELLOW='' LOG_RED='' LOG_GREEN=''
 fi
 
-_log() { printf '%s[%s]%s %s\n' "$2" "$1" "$LOG_RESET" "${*:3}" >&2; }
+_log() { printf '%s%s%s %s\n' "$2" "$1" "$LOG_RESET" "${*:3}" >&2; }
 
-info()  { _log INFO  "$LOG_BLUE"   "$@"; }
-debug() { [[ -n "${DEBUG:-}" ]] || return 0; _log DEBUG "$LOG_PURPLE" "$@"; }
-warn()  { _log WARN  "$LOG_YELLOW" "$@"; }
-error() { _log ERROR "$LOG_RED"    "$@"; }
+debug() { [[ -n "${DEBUG:-}" ]] || return 0; _log [DEBUG] "$LOG_PURPLE" "$@"; }
+error() { _log [ERROR] "$LOG_RED"    "$@"; }
+info()  { _log [INFO]  "$LOG_BLUE"   "$@"; }
+module() { _log "  󰕳" "$LOG_PURPLE" "$@"; }
+success() { _log  "$LOG_GREEN" "$@"; }
+warn()  { _log [WARN]  "$LOG_YELLOW" "$@"; }
 # -------------------------------------------------------------------------
 
 usage() {
@@ -48,7 +51,6 @@ usage() {
 
 list_modules() {
   local pretty=${1:-0}
-
 
   if [[ $pretty == 1 ]]; then
     info "The following modules are available for install:"
@@ -69,7 +71,7 @@ install_module() {
   if [[ ! -f "$module_path" ]]; then
     warn "Module '$module_path' could not be found."
   else
-    info "Installing module '$module_path'..."
+    module "Installing module '$module_path'..."
   fi
 }
 
@@ -104,9 +106,9 @@ if [[ "${#MODULES[@]}" -gt 0 ]]; then
   info "${#MODULES[@]} modules passed as args."
   install_modules "${MODULES[@]}"
 else
-  info "No modules passed as args."
-  shopt -s nullglob
-  install_modules "$MODULE_PATH"/*.sh
-  shopt -u nullglob
+  info "No modules passed as args. Installing all modules..."
+  mapfile -t MODULES < <(list_modules 0)
+  install_modules "${MODULES[@]}"
 fi
 
+success "Done!"
