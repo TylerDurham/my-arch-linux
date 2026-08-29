@@ -1,0 +1,215 @@
+#!/usr/bin/env bash
+#
+# install.sh - run the installer modules in install.d/
+#
+# USAGE:
+#   ./install.sh -s|--select          pick modules interactively with fzf
+#   ./install.sh -l|--list            list the available modules
+#   ./install.sh -x|--extra           list, select, install, or uninstall the  extra modules
+#   ./install.sh -i|--install         install module(s)
+#   ./install.sh -u|--uninstall       uninstall module(s)
+#   ./install.sh -h|--help            show this help
+#
+# Each module in 'install.d/' or 'install.d/extra/' is a standalone script 
+# setting up one piece of the system, so they can be run one at a time or 
+# as a full pass. 
+#
+# Note: Set DEBUG=1 in the environment for verbose logging.
+
+set -euo pipefail
+
+# EXIT CODES
+readonly EX_NOINPUT=66
+
+# GLOBALS
+readonly MODULE_DIR="install.d"
+readonly MODULE_DIR_PATH="$(realpath $(dirname $0))/$MODULE_DIR"
+EXTRA=0
+SELECT=0
+SPECIFIC=0
+ACTION=HELP
+MODULES=()
+UNINSTALL=0
+
+# --- logging ------------------------------------------------------------
+if [[ -t 2 ]]; then
+  LOG_RESET=$'\033[0m'
+  LOG_BLUE=$'\033[34m'
+  LOG_GREEN=$'\033[32m'
+  LOG_PURPLE=$'\033[35m'
+  LOG_RED=$'\033[31m'
+  LOG_YELLOW=$'\033[33m'
+else
+  LOG_RESET='' LOG_BLUE='' LOG_GREEN='' LOG_PURPLE='' LOG_RED='' LOG_YELLOW=''
+fi
+
+_log() { printf '%s%s%s %s\n' "$2" "$1" "$LOG_RESET" "${*:3}" >&2; }
+
+debug() { [[ -n "${DEBUG:-}" ]] || return 0; _log [DEBUG] "$LOG_PURPLE" "$@"; }
+error() { _log [ERROR] "$LOG_RED"    "$@"; }
+die()   { echo ""; _log [FATAL] "$LOG_RED" "$@"; exit 1; }
+info()  { _log [INFO]  "$LOG_BLUE"   "$@"; }
+module() { _log "  󰕳" "$LOG_PURPLE" "$@"; }
+success() { _log  "$LOG_GREEN" "$@"; }
+warn()  { _log [WARN]  "$LOG_YELLOW" "$@"; }
+indent() { sed "s/^/$(printf '%*s' "${1:-4}" '')/" >&2; }
+# -------------------------------------------------------------------------
+
+usage() {
+  sed -n '3,18p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+
+  echo ""
+  echo "MODULES:"
+  list_modules 1
+  EXTRA=1
+  echo ""
+  list_modules 1
+  exit 1
+}
+
+get_module_dir() {
+  local extra=
+
+  if [[ $EXTRA == 1 ]]; then 
+    extra="extra"
+  fi
+
+  echo "$MODULE_DIR_PATH/$extra/*.sh"
+}
+
+list_modules() {
+  local pretty=${1:-0}
+  local module_path_dir="$(get_module_dir)"
+
+  if [[ $pretty == 1 ]]; then
+    if [[ $EXTRA == 1 ]]; then 
+      module "The following  extra modules are available for install:"
+    else
+      module "The following modules are available for install:"
+    fi
+  fi
+  
+  for module in $module_path_dir; do 
+    if [[ $pretty == 1 ]]; then
+      echo "    - $(basename $module)"
+    else
+      printf '%s\n' "$module"
+    fi
+  done
+}
+
+process_module() {
+  local module_path="$1"
+  local action="install"
+  local status=0
+
+  if [[ $ACTION == "UNINSTALL" ]]; then
+    action="uninstall"
+  fi
+
+  if [[ ! -f "$module_path" ]]; then
+    warn "Module '$module_path' could not be found."
+    return
+  fi
+
+  module "${action^}ing module '$module_path'..."
+
+  # Each module is sourced in a subshell so its globals (readonly CWD and
+  # friends) and hook definitions cannot collide with the runner or leak into
+  # the module processed next.
+  (
+    local hook
+
+    source "$module_path"
+
+    for hook in on_init "on_${action}"; do
+      declare -F "$hook" >/dev/null \
+        || { error "Module '$module_path' does not define ${hook}()."; exit "$EX_NOINPUT"; }
+    done
+
+    on_init
+    "on_${action}"
+  ) || status=$?
+
+  if [[ $status -ne 0 ]]; then
+    die "Module '$module_path' failed with exit code ${status}."
+  fi
+}
+
+process_modules() {
+  local modules=("$@")
+
+  debug "Count of modules to '$ACTION': ${#MODULES[@]}"
+  for module in "${modules[@]}"; do 
+    process_module "$module"
+  done
+}
+
+while [[ "$#" -gt 0 ]]; do 
+  case "$1" in 
+    -h|--help) ACTION=HELP; shift ;;
+    -i|--install) ACTION=INSTALL; shift ;;
+    -l|--list) ACTION=LIST; shift ;; # list_modules 1; exit ;;
+    -s|--select) SELECT=1; shift ;;
+      # mapfile -t MODULES < <(list_modules | fzf -m --prompt "Select multiple modules by hitting <TAB>:"); 
+      # break ;;
+    -x|--extra) EXTRA=1; shift ;;
+    # -m|--module) 
+    #   shift
+    #     while [[ $# -gt 0 && "$1" != -* ]]; do
+    #         # [[ "$1" == *.sh ]] || 1+=".sh"
+    #         MODULES+=("$MODULE_DIR_PATH/${1%.sh}.sh")
+    #         shift
+    #     done
+    #   ;;
+    # -u|--uninstall) ACTION=UNINSTALL; shift ;;
+    *) break ;;
+  esac
+done
+
+clear
+
+
+
+if [[ $SELECT == 1 ]]; then 
+  if [[ $ACTION != UNINSTALL || $ACTION != INSTALL ]]; then
+    error "Please specify either -i|--install or -u|--uninstall!"
+    echo ""
+    usage
+    exit 1
+  fi
+  mapfile -t MODULES < <(list_modules | fzf -m --prompt "Select multiple modules by hitting <TAB>:"); 
+else
+  mapfile -t MODULES < <(list_modules 0)
+fi
+
+debug "Count of modules to process: ${#MODULES[@]}"
+debug "List of modules to process: "
+debug $(printf ' - %s\n' "${MODULES[@]}")
+debug "EXTRA: $EXTRA"
+debug "SELECT: $SELECT"
+debug "ACTION: $ACTION"
+
+case "$ACTION" in 
+  LIST) list_modules 1; exit 0 ;;
+  UNINSTALL) process_modules "${MODULES[@]}" ;;
+  INSTALL) process_modules "${MODULES[@]}" ;;
+  *) usage; exit 1 ;;
+esac
+
+# exit
+#
+# if [[ "${#MODULES[@]}" -gt 0 ]]; then
+#   info "${#MODULES[@]} modules passed as args. Processing ${#MODULES[@]} modules..."
+#   process_modules "${MODULES[@]}"
+# else
+#   info "No modules passed as args. Processing all modules..."
+#   mapfile -t MODULES < <(list_modules 0)
+#   process_modules "${MODULES[@]}"
+# fi
+
+success "Done!"
+
+if [[ ! $EXTRA == 1 ]]; then 
+  info "Be sure to install any  extra modules you might need!"
+fi
