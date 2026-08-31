@@ -1,0 +1,36 @@
+{
+  "prompt": "System!",
+  "lines": [
+    {
+      "name": "Lock",
+      "icon": "system-lock.svg",
+      "description": "Lock the system.",
+      "exec": "hypr-lock"
+    },
+    {
+      "name": "Suspend",
+      "icon": "system-suspend.svg",
+      "description": "Suspend the system.",
+      "exec": "hypr-suspend"
+    },
+    {
+      "name": "Logout",
+      "icon": "system-logout.svg",
+      "description": "Log out of the system.",
+      "exec": "hypr-logout"
+    },
+    {
+      "name": "Reboot",
+      "icon": "system-restart.svg",
+      "description": "Reboot the system.",
+      "exec": "hypr-reboot"
+    },
+    {
+      "name": "Shutdown",
+      "icon": "system-shutdown.svg",
+      "description": "Shutdown the system.",
+      "exec": "hypr-shutdown"
+    }
+  ]
+}
+

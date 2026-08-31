@@ -1,0 +1,29 @@
+/**
+* @name base16 Discord
+* @author @bypass_
+* @version 0.1.0
+* @description Built using Matte Black
+* @source https://github.com/imbypass/base16-Discord
+**/
+
+/* import the parent */
+@import url('https://imbypass.github.io/base16-discord/omarchy-discord.theme.css');
+
+:root {
+    --color00: #121212;
+    --color01: #d35f5f;
+    --color02: #ffc107;
+    --color03: #b91c1c;
+    --color04: #e68e0d;
+    --color05: #d35f5f;
+    --color06: #bebebe;
+    --color07: #bebebe;
+    --color08: #8a8a8d;
+    --color09: #b91c1c;
+    --color10: #ffc107;
+    --color11: #b90a0a;
+    --color12: #f59e0b;
+    --color13: #b91c1c;
+    --color14: #eaeaea;
+    --color15: #ffffff;
+}

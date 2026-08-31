@@ -1,0 +1,28 @@
+help_text=$(
+    cat <<EOF
+$(bold USAGE:) 
+
+  $(bold $(basename $0)) [OPTIONS] [FILE]
+
+$(bold DESCRIPTION:)
+
+  Reads a JSON file for modules that will be displayed in rofi.
+
+$(bold ARGUMENTS:)
+
+  [FILE] File to process. Use no argument at all to read from standard input. 
+
+  File MUST an array of JSON objects with the following schema:
+
+  [
+    { "name": "display name", "icon": "path to icon", "exec": "script/command to execute" }
+  ]
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+EOF
+)
+
+echo "$help_text"

@@ -1,0 +1,38 @@
+# nmtui color palette — osaka-jade
+#
+# Usage:
+#   export NEWT_COLORS_FILE=~/.local/share/my/themes/osaka-jade/nmtui.colors
+#
+# Terminal color mapping (from kitty.conf):
+#   black       = #23372b   darkgray      = #53685b
+#   red         = #ff5345   brightred     = #db9f9c
+#   green       = #549e6a   brightgreen   = #63b07a
+#   brown       = #459451   yellow        = #e5c736
+#   blue        = #509475   brightblue    = #acd4cf  (accent)
+#   magenta     = #d2689c   brightmagenta = #75bbb3
+#   cyan        = #2dd5b7   brightcyan    = #8cd3cb
+#   lightgray   = #f6f5dd   white         = #9eebb3
+
+root=lightgray,black
+border=blue,black
+window=lightgray,black
+shadow=black,black
+title=yellow,black
+button=black,blue
+actbutton=white,brightblue
+checkbox=lightgray,black
+actcheckbox=yellow,black
+entry=white,darkgray
+label=lightgray,black
+listbox=lightgray,black
+actlistbox=white,blue
+textbox=lightgray,black
+acttextbox=white,blue
+helpline=black,cyan
+roottext=lightgray,black
+emptyscale=black,black
+fullscale=blue,black
+disentry=darkgray,black
+compactbutton=black,blue
+actsellistbox=white,brightblue
+sellistbox=lightgray,blue

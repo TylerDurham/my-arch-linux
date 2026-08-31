@@ -1,0 +1,14 @@
+{
+  "network": {
+    "format": "",
+    "format-wifi": "",
+    "format-ethernet": "",
+    "format-disconnected": "󰤭", //An empty format will hide the module.
+    "tooltip-format": "{ifname} via {gwaddr} 󰊗",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+    "tooltip-format-ethernet": "{ifname} ",
+    "tooltip-format-disconnected": "󰖪",
+    "max-length": 50,
+    "on-click": "exec nmrs"
+  }
+}

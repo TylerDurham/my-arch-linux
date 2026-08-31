@@ -1,0 +1,42 @@
+# nmtui color palette — catppuccin-mocha
+#
+# Usage:
+#   export NEWT_COLORS_FILE=~/.local/share/my/themes/catppuccin-mocha/nmtui.colors
+#
+# Terminal color mapping (from kitty.conf):
+#   black       = #45475a   darkgray      = #585b70  (surface1 / surface2)
+#   red         = #f38ba8   brightred     = #f38ba8
+#   green       = #a6e3a1   brightgreen   = #a6e3a1
+#   brown       = #f9e2af   yellow        = #f9e2af
+#   blue        = #89b4fa   brightblue    = #89b4fa  (accent)
+#   magenta     = #f5c2e7   brightmagenta = #f5c2e7
+#   cyan        = #94e2d5   brightcyan    = #94e2d5
+#   lightgray   = #bac2de   white         = #a6adc8
+#
+# Note: Catppuccin's ANSI mapping uses surface1/surface2 for black/darkgray
+# rather than the terminal background, so nmtui panels sit as raised
+# surfaces on top of the base background instead of blending into it.
+
+root=lightgray,black
+border=blue,black
+window=lightgray,black
+shadow=black,black
+title=yellow,black
+button=black,blue
+actbutton=white,brightblue
+checkbox=lightgray,black
+actcheckbox=yellow,black
+entry=white,darkgray
+label=lightgray,black
+listbox=lightgray,black
+actlistbox=white,blue
+textbox=lightgray,black
+acttextbox=white,blue
+helpline=black,cyan
+roottext=lightgray,black
+emptyscale=black,black
+fullscale=blue,black
+disentry=darkgray,black
+compactbutton=black,blue
+actsellistbox=white,brightblue
+sellistbox=lightgray,blue

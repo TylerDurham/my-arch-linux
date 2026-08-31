@@ -1,0 +1,38 @@
+# nmtui color palette — everforest
+#
+# Usage:
+#   export NEWT_COLORS_FILE=~/.local/share/my/themes/everforest/nmtui.colors
+#
+# Terminal color mapping (from kitty.conf):
+#   black       = #475258   darkgray      = #859289
+#   red         = #e67e80   brightred     = #e67e80
+#   green       = #a7c080   brightgreen   = #a7c080
+#   brown       = #dbbc7f   yellow        = #dbbc7f
+#   blue        = #7fbbb3   brightblue    = #7fbbb3  (accent)
+#   magenta     = #d699b6   brightmagenta = #d699b6
+#   cyan        = #83c092   brightcyan    = #83c092
+#   lightgray   = #d3c6aa   white         = #d3c6aa
+
+root=lightgray,black
+border=blue,black
+window=lightgray,black
+shadow=black,black
+title=yellow,black
+button=black,blue
+actbutton=white,brightblue
+checkbox=lightgray,black
+actcheckbox=yellow,black
+entry=white,darkgray
+label=lightgray,black
+listbox=lightgray,black
+actlistbox=white,blue
+textbox=lightgray,black
+acttextbox=white,blue
+helpline=black,cyan
+roottext=lightgray,black
+emptyscale=black,black
+fullscale=blue,black
+disentry=darkgray,black
+compactbutton=black,blue
+actsellistbox=white,brightblue
+sellistbox=lightgray,blue

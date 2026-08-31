@@ -1,0 +1,171 @@
+# =============================================
+# Ayu Dark Plymouth Theme
+# LUKS encryption password support included
+# =============================================
+
+# Ayu Dark color palette (0.0–1.0 normalized)
+bg_r     = 0.051; bg_g     = 0.063; bg_b     = 0.090; # #0d1017
+fg_r     = 0.749; fg_g     = 0.741; fg_b     = 0.714; # #bfbdb6
+accent_r = 0.902; accent_g = 0.706; accent_b = 0.314; # #e6b450
+dim_r    = 0.384; dim_g    = 0.416; dim_b    = 0.451; # #626a73
+
+# Screen
+screen_w = Window.GetWidth();
+screen_h = Window.GetHeight();
+
+Window.SetBackgroundTopColor(bg_r, bg_g, bg_b);
+Window.SetBackgroundBottomColor(bg_r, bg_g, bg_b);
+
+# ---- Globals ----
+global num_dots;
+global dot_sprites;
+global show_dots;
+global password_shown;
+global pw_label_spr;
+global pw_bullets;
+global pw_bullet_count;
+
+num_dots      = 5;
+show_dots     = 1;
+password_shown = 0;
+pw_label_spr  = NULL;
+pw_bullets    = [];
+pw_bullet_count = 0;
+
+# ---- Loading dots ----
+dot_spacing = 24;
+dot_start_x = screen_w / 2 - (num_dots - 1) * dot_spacing / 2;
+dot_y       = screen_h * 0.56;
+
+dot_sprites = [];
+for (i = 0; i < num_dots; i++) {
+    img = Image.Text("●", accent_r, accent_g, accent_b, 1.0);
+    spr = Sprite();
+    spr.SetImage(img);
+    spr.SetX(dot_start_x + i * dot_spacing - img.GetWidth() / 2);
+    spr.SetY(dot_y - img.GetHeight() / 2);
+    spr.SetZ(1);
+    spr.SetOpacity(0.15);
+    dot_sprites[i] = spr;
+}
+
+# ---- Animation ----
+fun RefreshCallback() {
+    if (show_dots == 0) return;
+
+    t      = Plymouth.GetDuration();
+    cycle  = 1.6;
+    two_pi = 6.2832;
+
+    for (i = 0; i < num_dots; i++) {
+        phase   = (i / num_dots) * two_pi;
+        val     = Math.Sin((t / cycle) * two_pi - phase);
+        opacity = 0.15 + ((val + 1.0) / 2.0) * 0.75;
+        dot_sprites[i].SetOpacity(opacity);
+    }
+}
+
+Plymouth.SetRefreshFunction(RefreshCallback);
+
+fun UpdateStatusCallback(text) {
+    # intentionally minimal — no status text display
+}
+
+Plymouth.SetUpdateStatusFunction(UpdateStatusCallback);
+
+# ---- LUKS Password Prompt ----
+
+fun ClearPasswordUI() {
+    global pw_label_spr;
+    global pw_bullets;
+    global pw_bullet_count;
+
+    if (pw_label_spr != NULL) {
+        pw_label_spr.SetOpacity(0.0);
+        pw_label_spr = NULL;
+    }
+
+    for (i = 0; i < pw_bullet_count; i++) {
+        pw_bullets[i].SetOpacity(0.0);
+    }
+    pw_bullets       = [];
+    pw_bullet_count  = 0;
+}
+
+fun DisplayPasswordCallback(prompt, bullets) {
+    global password_shown;
+    global pw_label_spr;
+    global pw_bullets;
+    global pw_bullet_count;
+    global show_dots;
+
+    password_shown = 1;
+    show_dots      = 0;
+
+    for (i = 0; i < num_dots; i++) {
+        dot_sprites[i].SetOpacity(0.0);
+    }
+
+    ClearPasswordUI();
+
+    center_y = screen_h / 2;
+
+    # Prompt text (e.g. "Please enter passphrase for disk …")
+    label_img = Image.Text(prompt, fg_r, fg_g, fg_b, 1.0);
+    pw_label_spr = Sprite();
+    pw_label_spr.SetImage(label_img);
+    pw_label_spr.SetX(screen_w / 2 - label_img.GetWidth() / 2);
+    pw_label_spr.SetY(center_y - 28);
+    pw_label_spr.SetZ(10);
+    pw_label_spr.SetOpacity(1.0);
+
+    # Bullet dots for each typed character
+    bullet_spacing = 20;
+    pw_bullets      = [];
+    pw_bullet_count = 0;
+
+    if (bullets > 0) {
+        bul_total = (bullets - 1) * bullet_spacing;
+        bul_start = screen_w / 2 - bul_total / 2;
+
+        for (i = 0; i < bullets; i++) {
+            b_img = Image.Text("●", accent_r, accent_g, accent_b, 1.0);
+            b_spr = Sprite();
+            b_spr.SetImage(b_img);
+            b_spr.SetX(bul_start + i * bullet_spacing - b_img.GetWidth() / 2);
+            b_spr.SetY(center_y + 8);
+            b_spr.SetZ(10);
+            b_spr.SetOpacity(1.0);
+            pw_bullets[i] = b_spr;
+        }
+        pw_bullet_count = bullets;
+    } else {
+        # Empty field — show a dim cursor hint
+        cur_img = Image.Text("▏", dim_r, dim_g, dim_b, 0.7);
+        cur_spr = Sprite();
+        cur_spr.SetImage(cur_img);
+        cur_spr.SetX(screen_w / 2 - cur_img.GetWidth() / 2);
+        cur_spr.SetY(center_y + 8);
+        cur_spr.SetZ(10);
+        cur_spr.SetOpacity(0.7);
+        pw_bullets[0]   = cur_spr;
+        pw_bullet_count = 1;
+    }
+}
+
+fun HidePasswordCallback() {
+    global password_shown;
+    global show_dots;
+
+    password_shown = 0;
+    show_dots      = 1;
+
+    ClearPasswordUI();
+
+    for (i = 0; i < num_dots; i++) {
+        dot_sprites[i].SetOpacity(0.15);
+    }
+}
+
+Plymouth.SetDisplayPasswordFunction(DisplayPasswordCallback);
+Plymouth.SetHidePasswordFunction(HidePasswordCallback);

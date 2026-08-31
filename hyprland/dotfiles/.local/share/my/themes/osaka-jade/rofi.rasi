@@ -1,0 +1,31 @@
+* {
+  /* UI Colors */
+  accent1:            #509475;  /* Jade — keywords, highlights */
+  accent2:            #2DD5B7;  /* Teal — functions, types */
+  cursor:             #D7C995;  /* Sand — cursor */
+  foreground:         #C1C497;  /* Pale olive — primary text */
+  background:         #111C18;  /* Deep jade — editor background */
+  background-trans:   #111C18BB;/* Deep jade — editor background */
+  selection-fg:       #C1C497;  /* Same as foreground */
+  selection-bg:       #2C4536;  /* Lifted jade — selection */
+
+  /* Text colors */
+  text1:              #C1C497;  /* Primary text — same as foreground */
+  text2:              #8A9679;  /* Muted text — comments, secondary */
+  text3:              #53685B;  /* Subtle text — disabled, placeholders */
+
+  /* Surface colors */
+  surface1:           #17251E;  /* Slightly lifted surface — sidebars */
+  surface2:           #1D2E25;  /* Mid surface — input backgrounds, cards */
+  surface3:           #23372B;  /* Raised surface — hover states, borders */
+
+  /* Named colors */
+  red:                #FF5345;  /* Red — errors, deletions */
+  green:              #63B07A;  /* Green — strings, additions */
+  green-trans:        #63B07AAA;/* Green — strings, additions */
+  blue:               #ACD4CF;  /* Pale cyan — constants, links */
+  orange:             #D7C995;  /* Sand — keywords, warnings */
+  yellow:             #E5C736;  /* Yellow — attributes, tags */
+  purple:             #D2689C;  /* Pink — builtins, specials */
+  cyan:               #2DD5B7;  /* Teal — functions, types */
+}

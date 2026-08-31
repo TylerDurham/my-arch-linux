@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+
+if pgrep -x swaync; then
+  killall -SIGUSR2 swaync
+else
+  swaync &>/dev/null &
+  disown
+fi

@@ -1,0 +1,83 @@
+# Main background, empty for terminal default, need to be empty if you want transparent background
+theme[main_bg]="#121212"
+
+# Main text color
+theme[main_fg]="#bebebe"
+
+# Title color for boxes
+theme[title]="#bebebe"
+
+# Highlight color for keyboard shortcuts
+theme[hi_fg]="#e68e0d"
+
+# Background color of selected item in processes box.
+theme[selected_bg]="#282828"
+
+# Foreground color of selected item in processes box.
+theme[selected_fg]="#bebebe"
+
+# Color of inactive/disabled text
+theme[inactive_fg]="#6e6e70"
+
+# Color of text appearing on top of graphs.
+theme[graph_text]="#bebebe"
+
+# Background color of the percentage meters.
+theme[meter_bg]="#282828"
+
+# Misc colors for processes box including mini cpu graphs, details memory graph and details status text.
+theme[proc_misc]="#eaeaea"
+
+# CPU, Memory, Network, Proc box outline colors
+theme[cpu_box]="#bebebe"
+theme[mem_box]="#f59e0b"
+theme[net_box]="#d35f5f"
+theme[proc_box]="#e68e0d"
+
+# Box divider line and small boxes line color
+theme[div_line]="#333333"
+
+# Temperature graph color (cool -> warm -> hot)
+theme[temp_start]="#f59e0b"
+theme[temp_mid]="#ffc107"
+theme[temp_end]="#d35f5f"
+
+# CPU graph colors
+theme[cpu_start]="#eaeaea"
+theme[cpu_mid]="#e68e0d"
+theme[cpu_end]="#d35f5f"
+
+# Mem/Disk free meter
+theme[free_start]="#bebebe"
+theme[free_mid]="#e68e0d"
+theme[free_end]="#eaeaea"
+
+# Mem/Disk cached meter
+theme[cached_start]="#e68e0d"
+theme[cached_mid]="#eaeaea"
+theme[cached_end]="#bebebe"
+
+# Mem/Disk available meter
+theme[available_start]="#bebebe"
+theme[available_mid]="#8a8a8d"
+theme[available_end]="#d35f5f"
+
+# Mem/Disk used meter
+theme[used_start]="#f59e0b"
+theme[used_mid]="#eaeaea"
+theme[used_end]="#e68e0d"
+
+# Download graph colors
+theme[download_start]="#bebebe"
+theme[download_mid]="#8a8a8d"
+theme[download_end]="#d35f5f"
+
+# Upload graph colors
+theme[upload_start]="#f59e0b"
+theme[upload_mid]="#eaeaea"
+theme[upload_end]="#e68e0d"
+
+# Process box color gradient for threads, mem and cpu usage
+theme[process_start]="#eaeaea"
+theme[process_mid]="#e68e0d"
+theme[process_end]="#d35f5f"

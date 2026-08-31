@@ -1,0 +1,38 @@
+# nmtui color palette — lovely-day (Ayu Dark)
+#
+# Usage:
+#   export NEWT_COLORS_FILE=~/.local/share/my/themes/lovely-day/nmtui.colors
+#
+# Terminal color mapping (from kitty.conf):
+#   black       = #01070a   darkgray    = #636a6d
+#   red         = #a96d2f   brightred   = #d4903d  (gold)
+#   green       = #5d7f63   brightgreen = #7da580
+#   brown       = #87804e   yellow      = #aca663
+#   blue        = #2895a3   brightblue  = #48bcce  (accent)
+#   magenta     = #966f4c   brightmagenta = #be9364
+#   cyan        = #368b8d   brightcyan  = #54b2b4
+#   lightgray   = #9f9f84   white       = #c5c6a2
+
+root=lightgray,black
+border=blue,black
+window=lightgray,black
+shadow=black,black
+title=yellow,black
+button=black,blue
+actbutton=white,brightblue
+checkbox=lightgray,black
+actcheckbox=yellow,black
+entry=white,darkgray
+label=lightgray,black
+listbox=lightgray,black
+actlistbox=white,blue
+textbox=lightgray,black
+acttextbox=white,blue
+helpline=black,cyan
+roottext=lightgray,black
+emptyscale=black,black
+fullscale=blue,black
+disentry=darkgray,black
+compactbutton=black,blue
+actsellistbox=white,brightblue
+sellistbox=lightgray,blue

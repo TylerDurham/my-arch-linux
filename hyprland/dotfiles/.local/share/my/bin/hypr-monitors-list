@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+
+while IFS=$'\x1f' read -r name id description make model; do
+    echo "$id $name $description $make $model"
+done < <(hyprctl monitors -j |
+  jq -r '.[] | 
+    [
+      .name, 
+      .id, 
+      .description,
+      .make,
+      .model
+      | tostring
+    ] 
+    | join("\u001f")')
+

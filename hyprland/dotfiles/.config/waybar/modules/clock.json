@@ -1,0 +1,6 @@
+{
+  "clock": {
+    "format": "{:L%A %I:%M %p}",
+    "format-alt": "{:L%A %I:%M %p}"
+  }
+}

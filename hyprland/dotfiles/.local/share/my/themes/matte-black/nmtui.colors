@@ -1,0 +1,38 @@
+# nmtui color palette — matte-black
+#
+# Usage:
+#   export NEWT_COLORS_FILE=~/.local/share/my/themes/matte-black/nmtui.colors
+#
+# Terminal color mapping (from kitty.conf):
+#   black       = #333333   darkgray      = #8a8a8d
+#   red         = #d35f5f   brightred     = #b91c1c
+#   green       = #ffc107   brightgreen   = #ffc107
+#   brown       = #b91c1c   yellow        = #b90a0a
+#   blue        = #e68e0d   brightblue    = #f59e0b  (accent)
+#   magenta     = #d35f5f   brightmagenta = #b91c1c
+#   cyan        = #bebebe   brightcyan    = #eaeaea
+#   lightgray   = #bebebe   white         = #ffffff
+
+root=lightgray,black
+border=blue,black
+window=lightgray,black
+shadow=black,black
+title=yellow,black
+button=black,blue
+actbutton=white,brightblue
+checkbox=lightgray,black
+actcheckbox=yellow,black
+entry=white,darkgray
+label=lightgray,black
+listbox=lightgray,black
+actlistbox=white,blue
+textbox=lightgray,black
+acttextbox=white,blue
+helpline=black,cyan
+roottext=lightgray,black
+emptyscale=black,black
+fullscale=blue,black
+disentry=darkgray,black
+compactbutton=black,blue
+actsellistbox=white,brightblue
+sellistbox=lightgray,blue

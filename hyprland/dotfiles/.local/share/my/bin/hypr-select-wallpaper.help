@@ -1,0 +1,18 @@
+help_text=$(cat <<EOF
+$(bold USAGE:) 
+
+  $(bold $(basename $0)) [-h] [-v] [-d <director>]
+
+$(bold DESCRIPTION:)
+
+  Allows the user to interactively select a wallpaper. 
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+  -d, --directory  The directory to load wallpapers from
+EOF
+)
+
+echo "$help_text"

@@ -1,0 +1,187 @@
+@import "../my/theme/waybar.css";
+
+* {
+  all: unset;
+  font-family: "JetBrainsMono Nerd Font Propo", sans-serif;
+  font-size: 14px;
+}
+
+menu {
+  background-color: @background;
+  padding: 10px;
+  border-radius: 10px;
+  border: solid 1px @accent1;
+}
+
+.modules-right, .modules-left, .modules-center {
+  border-radius: 15px;
+  padding: 0px 5px;
+  margin: 10px 10px;
+  margin-bottom: 0px;
+  color: @foreground;
+  background-color: alpha(@background, 0.90);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.5);
+}
+
+.modules-left {
+  margin-left: 26px;
+}
+
+.modules-center {
+  padding: 0px 25px;
+}
+
+.modules-right {
+  margin-right: 34px;
+}
+
+window#waybar {
+  background-color: transparent;
+  margin: 0px;
+}
+
+window#waybar > box {
+}
+
+#custom-launcher {
+  color: @cyan;
+  font-size: 22px;
+}
+
+#clock {
+  color: @foreground;
+  font-weight: 500;
+  padding: 1px 10px;
+  border-radius: 20px;
+}
+
+/* Propo gives every glyph its own advance (6.8px - 16.2px here), so equal
+   margins around unequal boxes read as uneven spacing — and each module
+   resizes as its state changes (battery level, wifi up/down, power profile),
+   shifting its neighbours. A fixed slot makes every icon centre sit on the
+   same pitch. 20px matches #bluetooth's pill so the whole row agrees. */
+#battery,
+#custom-launcher,
+#idle_inhibitor,
+#network,
+#power-profiles-daemon,
+#custom-audio
+{
+  margin: 1px 8px;
+  min-width: 20px;
+}
+
+/* Capacity states from the battery module's "states" config: 80-100 good,
+   10-79 warning, 0-9 critical. These come after .charging deliberately —
+   a state class is always present, so capacity drives the colour and
+   charging stays visible through its own icon set instead. */
+#battery.good {
+  color: @green;
+}
+
+#battery.warning {
+  color: @orange;
+}
+
+#battery.critical {
+  color: @red;
+}
+
+#tray {
+  margin-left: 15px;
+}
+
+#workspaces {
+  padding: 0px 15px;
+}
+
+#workspaces button {
+    border-bottom: 2px solid transparent;
+    min-width: 40px;
+    background-color: transparent;
+}
+
+#workspaces button.empty {
+    color: @foreground;
+}
+
+#workspaces button.active {
+  color: @green;
+  border-radius: 25px;
+  border-bottom: 2px solid @text1;
+  border-top: 2px solid @blue;
+  transition: all 0.3s ease-in-out;
+}
+
+/* Unlike the other icons this one is a filled pill, so the 10px vertical
+   margin is what sets the capsule's height — keep it. Only the horizontal
+   margin was missing, which left it flush against its neighbours. */
+#bluetooth {
+  color: @ffffff;
+  min-width: 20px;
+  margin: 10px 8px;
+  background-color: #003366;
+  border-radius: 15px;
+}
+
+#bluetooth.connected {
+  color: @background;
+  background-color: @green;
+}
+
+/* Blue while any MPRIS player is playing, dimmed otherwise. The class comes
+   from waybar-audio; margin and min-width come from the shared icon rule. */
+#custom-audio {
+  color: @text3;
+  transition: color 0.3s ease-in-out;
+}
+
+#custom-audio.playing {
+  color: @blue;
+}
+
+#idle_inhibitor.activated {
+  animation: pulse 3s ease-in-out infinite;
+  color: @yellow;
+}
+
+#idle_inhibitor.deactivated {
+  color: @text3;
+}
+
+#power-profiles-daemon.performance {
+  animation: pulse 3s ease-in-out infinite;
+  color: @yellow;
+}
+
+#power-profiles-daemon.balanced{
+  color: @blue;
+}
+
+#power-profiles-daemon.power-saver {
+  color: @green;
+}
+
+tooltip {
+    background-color: alpha(@background, 0.90);
+    border: 1px solid alpha(@yellow, 0.6);
+    border-radius: 8px;
+    padding: 10px;
+}
+
+tooltip label {
+    color: @foreground;
+    font-size: 13px;
+}
+
+@keyframes pulse {
+    0%   { opacity: 1; }
+    50%  { opacity: 0.4; }
+    100% { opacity: 1; }
+}
+
+@keyframes pulse-bg {
+    0%   { background: rgba(255, 200, 0, 0.0); }
+    50%  { background: rgba(255, 200, 0, 0.25); }
+    100% { background: rgba(255, 200, 0, 0.0); }
+}

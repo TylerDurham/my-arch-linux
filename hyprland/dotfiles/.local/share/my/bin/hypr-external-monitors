@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+for status in /sys/class/drm/card*-*/status; do
+  [[ "$status" == *-eDP-*/status ]] && continue
+  [[ "$(<"$status")" == "connected" ]] && exit 0
+done
+exit 1

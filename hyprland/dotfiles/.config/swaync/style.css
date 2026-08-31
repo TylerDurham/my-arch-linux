@@ -1,0 +1,359 @@
+@import "../my/theme/waybar.css";
+
+* {
+  all: unset;
+  font-size: 14px;
+  font-family: "JetBrainsMono Nerd Font Propo";
+  transition: 200ms;
+  background: transparent;
+}
+window {
+  background: transparent;
+  background-color: transparent;
+}
+
+/* Main container the GTK theme often colors */
+#main {
+  background: transparent;
+  background-color: transparent;
+  box-shadow: none;
+  border: none;
+}
+
+/* Notifications list background */
+#notifications {
+  background: transparent;
+  background-color: transparent;
+}
+
+trough highlight {
+  background: @accent1;
+}
+
+scale {
+  margin: 0 7px;
+}
+
+scale trough {
+  margin: 0rem 1rem;
+  min-height: 8px;
+  min-width: 70px;
+  border-radius: 12.6px;
+}
+
+trough slider {
+  margin: -10px;
+  border-radius: 12.6px;
+  box-shadow: 0 0 2px rgba(0, 0, 0, 0.8);
+  transition: all 0.2s ease;
+  background-color: @blue;
+}
+
+trough slider:hover {
+  box-shadow:
+    0 0 2px rgba(0, 0, 0, 0.8),
+    0 0 8px @blue;
+}
+
+trough {
+  background-color: @surface1;
+}
+
+/* notifications */
+.notification-background {
+  box-shadow:
+    0 0 8px 0 rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px @surface2;
+  border-radius: 12.6px;
+  margin: 18px;
+  background: @background;
+  color: @foreground;
+  padding: 0;
+}
+
+.notification-background .notification {
+  padding: 7px;
+  border-radius: 12.6px;
+}
+
+.notification-background .notification.critical {
+  box-shadow: inset 0 0 7px 0 @red;
+}
+
+.notification .notification-content {
+  margin: 7px;
+}
+
+.notification .notification-content overlay {
+  /* icons */
+  margin: 4px;
+}
+
+.notification-content .summary {
+  color: @foreground;
+}
+
+.notification-content .time {
+  color: @text2;
+}
+
+.notification-content .body {
+  color: @text1;
+}
+
+.notification > *:last-child > * {
+  min-height: 3.4em;
+}
+
+.notification-background .close-button {
+  margin: 7px;
+  padding: 2px;
+  border-radius: 6.3px;
+  color: @background;
+  background-color: @red;
+}
+
+.notification-background .close-button:hover {
+  background-color: @red;
+}
+
+.notification-background .close-button:active {
+  background-color: @purple;
+}
+
+.notification .notification-action {
+  border-radius: 7px;
+  color: @foreground;
+  box-shadow: inset 0 0 0 1px @surface2;
+  margin: 4px;
+  padding: 8px;
+  font-size: 0.2rem; /* controls the button size not text size*/
+}
+
+.notification .notification-action {
+  background-color: @surface1;
+}
+
+.notification .notification-action:hover {
+  background-color: @surface2;
+}
+
+.notification .notification-action:active {
+  background-color: @surface3;
+}
+
+.notification.critical progress {
+  background-color: @red;
+}
+
+.notification.low progress,
+.notification.normal progress {
+  background-color: @blue;
+}
+
+.notification progress,
+.notification trough,
+.notification progressbar {
+  border-radius: 12.6px;
+  padding: 3px 0;
+}
+
+/* control center */
+.control-center {
+  box-shadow:
+    0 0 8px 0 rgba(0, 0, 0, 0.8),
+    inset 0 0 0 1px @surface1;
+  border-radius: 12.6px;
+  background-color: alpha(@background, 0.8);
+  transition: all 250ms ease;
+  color: @foreground;
+  margin-right: 20px;
+  margin-bottom: 20px;
+}
+
+.control-center .notification-background {
+  border-radius: 7px;
+  box-shadow: inset 0 0 0 1px @surface2;
+  /* Lifted above the control centre's own @background so cards separate. */
+  background-color: @surface1;
+  margin: 4px 10px;
+}
+
+.control-center .notification-background .notification {
+  border-radius: 7px;
+}
+
+.control-center .notification-background .notification.low {
+  opacity: 0.8;
+}
+
+.control-center .widget-title > label {
+  color: @foreground;
+  font-size: 14px;
+}
+
+.control-center .widget-title button {
+  border-radius: 7px;
+  color: @foreground;
+  background-color: @surface1;
+  box-shadow: inset 0 0 0 1px @surface2;
+  padding: 8px;
+}
+
+.control-center .widget-title button:hover {
+  background-color: @surface2;
+}
+
+.control-center .widget-title button:active {
+  background-color: @surface3;
+}
+
+.control-center .notification-group {
+  margin-top: 10px;
+}
+
+.control-center .notification-group:focus .notification-background {
+  background-color: @surface1;
+}
+
+scrollbar slider {
+  margin: -3px;
+  opacity: 0.8;
+}
+
+scrollbar trough {
+  margin: 2px 0;
+}
+
+/* dnd */
+.widget-dnd {
+  margin-top: 5px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+}
+
+.widget-dnd > switch {
+  font-size: initial;
+  border-radius: 8px;
+  background: @surface1;
+  box-shadow: none;
+}
+
+.widget-dnd > switch:checked {
+  background: @blue;
+}
+
+.widget-dnd > switch slider {
+  background: @surface2;
+  border-radius: 8px;
+}
+
+/* mpris */
+.widget-mpris-player {
+  background: @surface1;
+  border-radius: 12.6px;
+  color: @foreground;
+}
+
+.mpris-overlay {
+  background-color: @surface1;
+  opacity: 0.9;
+  padding: 15px 10px;
+}
+
+.widget-mpris-album-art {
+  -gtk-icon-size: 100px;
+  border-radius: 12.6px;
+  margin: 0 10px;
+}
+
+.widget-mpris-title {
+  font-size: 1.2rem;
+  color: @foreground;
+}
+
+.widget-mpris-subtitle {
+  font-size: 1rem;
+  color: @text1;
+}
+
+.widget-mpris button {
+  border-radius: 12.6px;
+  color: @foreground;
+  margin: 0 5px;
+  padding: 2px;
+}
+
+.widget-mpris button image {
+  -gtk-icon-size: 1.8rem;
+}
+
+.widget-mpris button:hover {
+  background-color: @surface1;
+}
+
+.widget-mpris button:active {
+  background-color: @surface2;
+}
+
+.widget-mpris button:disabled {
+  opacity: 0.5;
+}
+
+.widget-menubar > box > .menu-button-bar > button > label {
+  font-size: 3rem;
+  padding: 0.5rem 2rem;
+}
+
+.widget-menubar > box > .menu-button-bar > :last-child {
+  color: @red;
+}
+
+.power-buttons button:hover,
+.powermode-buttons button:hover,
+.screenshot-buttons button:hover {
+  background: @surface1;
+}
+
+.control-center .widget-label > label {
+  color: @foreground;
+  font-size: 2rem;
+}
+
+.widget-buttons-grid {
+  padding-top: 1rem;
+}
+
+.widget-buttons-grid > flowbox > flowboxchild > button label {
+  font-size: 2.5rem;
+}
+
+.widget-volume {
+  padding: 1rem 0;
+}
+
+.widget-volume label {
+  color: @cyan;
+  padding: 0 1rem;
+}
+
+.widget-volume trough highlight {
+  background: @cyan;
+}
+
+.widget-backlight trough highlight {
+  background: @yellow;
+}
+
+.widget-backlight label {
+  font-size: 1.5rem;
+  color: @yellow;
+}
+
+.widget-backlight .KB {
+  padding-bottom: 1rem;
+}
+
+.image {
+  padding-right: 0.5rem;
+}

@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=Ayu Dark
+Description=A minimal boot splash using the Ayu Dark color palette, with LUKS password support
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/ayu-dark
+ScriptFile=/usr/share/plymouth/themes/ayu-dark/ayu-dark.script

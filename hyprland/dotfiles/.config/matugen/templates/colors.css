@@ -1,0 +1,33 @@
+/* UI Colors (based on the Ayu Dark Color Palette) */
+/* https://github.com/ayu-theme/ayu-colors */
+ 
+@define-color accent1       = {{colors.on_primary.default.hex}}
+@define-color accent2       = {{colors.on_secondary.default.hex}}
+@define-color cursor        = {{colors.on_secondary.default.hex}}
+@define-color foreground    = {{colors.on_surface.default.hex}};
+@define-color black         = {{colors.background.default.hex}};
+@define-color background    = {{colors.background.default.hex}};
+@define-color selection_fg  = {{colors.on_surface.default.hex}};
+@define-color selection_bg  = {{colors.on_surface.default.hex}};
+
+/* Text colors */
+text1                 = {{colors.on_surface.default.hex}};  
+text2                 = {{colors.on_surface_variant.default.hex}}
+text3                 = {{colors.on_primary_container.default.hex}};
+
+/* Surface colors */
+surface1              = {{colors.surface.default.hex}}; 
+surface2              = {{colors.surface_variant.default.hex}};
+surface3              = {{colors.primary_container.default.hex}};
+
+/* Named colors */
+@define-color black {{colors.background.default.hex}};
+@define-color blue {{colors.blue.default.hex}};
+@define-color cyan {{colors.pink.default.hex}};
+@define-color green {{colors.green.default.hex}};
+@define-color magenta {{colors.magenta.default.hex}};
+@define-color orange {{colors.orange.default.hex}};
+@define-color pink {{colors.pink.default.hex}};
+@define-color red {{colors.error_container.default.hex}};
+@define-color yellow {{colors.yellow.default.hex}};
+

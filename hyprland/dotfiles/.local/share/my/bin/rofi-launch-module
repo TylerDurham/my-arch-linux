@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+LOG_LIB="$MY_LIB_DIR/bash/logger.sh"
+source "$LOG_LIB" || {
+  echo "FATAL: Could not load logger library '$LOG_LIB'!"
+  exit 1
+}
+
+THEME=$(gsettings get org.gnome.desktop.interface icon-theme | tr -d "'")
+ICON_DIR="$HOME/.local/share/my/icons/"
+
+rofi_prompt="Select"
+
+usage() {
+  source "$0.help"
+  exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -h | --help) usage ;;
+  -v | --verbose)
+    LOG_LEVEL=8
+    shift
+    ;;
+  *)
+    input_file="$1"
+    break
+    ;;
+  esac
+done
+
+process-modules() {
+  while IFS=$'\t' read -r name icon description cmd; do
+    # Add to our modules lookup
+    modules["$name"]=$(echo "$cmd" | envsubst)
+
+    # Add to data that we'll send to rofi: name and icon
+    rofi_lines+="$name\0icon\x1f$ICON_DIR/$icon\n"
+  done < <(jq -r '.lines[] | [.name, .icon, .description, .exec] | @tsv')
+}
+
+# The data we will send to rofi
+declare rofi_lines
+
+# State management for rofi. Maps a name to an executable.
+declare -A modules
+
+if [ -n "$input_file" ]; then
+  # User passed a file as an argument
+  process-modules <$input_file
+elif [[ ! -t 0 ]]; then
+  # User piped a file via STDIN
+  input_file="/dev/stdin"
+  process-modules
+else
+  error "No input supplied."
+  usage
+fi
+
+selected_module=$(echo -e "$rofi_lines" | rofi-launch --lines 1 --columns "${#modules[@]}" --grid --prompt "$rofi_prompt")
+
+[ -z "$selected_module" ] && {
+  error "Nothing selected!"
+  exit 1
+}
+
+selected_module_cmd="${modules[$selected_module]}"
+
+[ -z "$selected_module_cmd" ] && {
+  error "No exec cmd found for module '$selected_module'!"
+}
+
+[ -e "$selected_module" ] && {
+  error "Module exec command cannot be found!"
+}
+
+eval $selected_module_cmd
+
+debug "input_file: $input_file"
+debug "count of modules: ${#modules[@]}"
+debug "rofi_lines: $rofi_lines"
+debug "selected_module: $selected_module"
+debug "selected_module_cmd: $selected_module_cmd"
+debug "LOG_LEVEL: $LOG_LEVEL"

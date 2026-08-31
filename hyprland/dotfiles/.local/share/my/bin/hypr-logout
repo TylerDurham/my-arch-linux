@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+# hypr-close-all-windows
+
+# sleep 1
+
+# sudo systemctl stop sddm.service
+
+command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'

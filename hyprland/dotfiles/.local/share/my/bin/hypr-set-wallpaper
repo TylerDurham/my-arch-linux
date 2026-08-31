@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+# Libs
+if ! . "$MY_LIB_DIR/bash/require.sh" logger; then
+  echo "Could not load libraries from '$MY_LIB_DIR'!" >&2
+  exit 1
+fi
+
+usage() {
+  source "$0.help"
+  exit 1
+}
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -h | --help) usage ;;
+  -v | --verbose)
+    LOG_LEVEL=8
+    shift
+    ;;
+  -i | --image)
+    IMAGE="$2"
+    shift 2
+    ;;
+  -*)
+    echo "Unknown option: $1" >&2
+    usage
+    ;;
+  *) break ;;
+  esac
+done
+
+if [ -n "$IMAGE" ]; then
+
+  [[ -f "$IMAGE" ]] && debug "'$IMAGE' exists as file" || debug "'$IMAGE' is NOT a file"
+  [[ -L "$IMAGE" ]] && debug "'$IMAGE' exists as symlink" || debug "'$IMAGE' is NOT a symlink"
+  [[ -f "$IMAGE" || -L "$IMAGE" ]] || fatal "Image '$IMAGE' does not exist on filesystem!"
+
+  link="$HOME/.config/my/background"
+  ln -sf "$IMAGE" "$link"
+
+  awww img $link --transition-fps 60 --transition-step 255 --transition-type center
+
+else
+  error "No arguments specified!"
+  usage
+fi

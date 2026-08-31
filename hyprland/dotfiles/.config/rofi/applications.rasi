@@ -1,0 +1,188 @@
+/**
+ *
+ * Author : Aditya Shakya (adi1090x)
+ * Github : @adi1090x
+ * 
+ * Rofi Theme File
+ * Rofi Version: 1.7.3
+ **/
+
+/*****----- Configuration -----*****/
+configuration {
+	modi:                       "drun";
+    show-icons:               true;
+  display-drun:               "Applications";
+	drun-display-format:        "{name}";
+}
+
+/*****----- Global Properties -----*****/
+@import                          "~/.config/my/theme/rofi.rasi"
+@import                          "~/.config/rofi/fonts.rasi"
+
+/*****----- Main Window -----*****/
+window {
+    transparency:                "real";
+    location:                    center;
+    anchor:                      center;
+    fullscreen:                  false;
+    width:                       1000px;
+    x-offset:                    0px;
+    y-offset:                    0px;
+
+    enabled:                     true;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      2px solid;
+    border-radius:               15;
+    border-color:                @surface3;
+    background-color:            @background;
+    cursor:                      "default";
+}
+
+/*****----- Main Box -----*****/
+mainbox {
+    enabled:                     true;
+    spacing:                     20px;
+    margin:                      40px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px 0px 0px 0px;
+    border-color:                @accent2;
+    background-color:            transparent;
+    children:                    [ "inputbar", "listview" ];
+}
+
+/*****----- Inputbar -----*****/
+inputbar {
+    enabled:                     true;
+    spacing:                     5px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @accent2;
+    background-color:            @background;
+    text-color:                  @foreground;
+    children:                    [ "prompt", "textbox-prompt-colon", "entry" ];
+}
+
+prompt {
+    enabled:                     true;
+    background-color:            @accent2;
+    text-color:                  @background;
+    font-weight: bold;
+    padding:                     7px 25px 7px 25px;
+    border-radius:               25px;
+}
+
+textbox-prompt-colon {
+    enabled:                     true;
+    expand:                      false;
+    str:                         "";
+    background-color:            @surface1;
+    padding:                     7px;
+    text-color:                  @foreground;
+}
+
+entry {
+    enabled:                     true;
+    background-color:            @surface1;
+    border-radius:               0px 25px 25px 0px;
+    padding:                     7px;
+    text-color:                  inherit;
+    cursor:                      text;
+    placeholder:                 "Search...";
+    placeholder-color:           inherit;
+}
+
+/*****----- Listview -----*****/
+listview {
+    enabled:                     true;
+    columns:                     6;
+    lines:                       3;
+    cycle:                       true;
+    dynamic:                     true;
+    scrollbar:                   false;
+    layout:                      vertical;
+    reverse:                     false;
+    fixed-height:                true;
+    fixed-columns:               true;
+    
+    spacing:                     20px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                @accent2;
+    background-color:            transparent;
+    text-color:                  @foreground;
+    cursor:                      "default";
+}
+scrollbar {
+    handle-width:                5px ;
+    handle-color:                @accent2;
+    border-radius:               0px;
+    background-color:            @background;
+}
+
+/*****----- Elements -----*****/
+element {
+    enabled:                     true;
+    spacing:                     20px;
+    margin:                      0px;
+    padding:                     0px;
+    border:                      0px solid;
+    border-radius:               0px;
+    border-color:                transparent;
+    background-color:            transparent;
+    text-color:                  @foreground;
+    orientation:                 vertical;
+    cursor:                      pointer;
+}
+element normal.normal {
+    background-color:            transparent;
+    text-color:                  @foreground;
+}
+element selected.normal {
+    background-color:            transparent;
+    text-color:                  @foreground;
+}
+element-icon {
+    padding:                     30px;
+    border-radius:               20px;
+    background-color:            @background;
+    text-color:                  inherit;
+    size:                        64px;
+    cursor:                      inherit;
+}
+element-text {
+    padding:                     10px;
+    background-color:            transparent;
+    text-color:                  inherit;
+    highlight:                   inherit;
+    cursor:                      inherit;
+    vertical-align:              0.5;
+    horizontal-align:            0.5;
+}
+element-text selected {
+    border-radius:               100%;
+    background-color:            @green-trans;
+    text-color:                  @background;
+}
+
+/*****----- Message -----*****/
+error-message {
+    padding:                     20px;
+    border:                      2px solid;
+    border-radius:               20px;
+    border-color:                @accent2;
+    background-color:            @background;
+    text-color:                  @foreground;
+}
+textbox {
+    background-color:            @background;
+    text-color:                  @foreground;
+    vertical-align:              0.5;
+    horizontal-align:            0.0;
+    highlight:                   none;
+}

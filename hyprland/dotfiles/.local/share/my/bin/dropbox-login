@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+DISPLAY= WAYLAND_DISPLAY= dropbox start -i

@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if pgrep -x swayosd-server; then
+  echo "Restarting swayosd-server..."
+  killall -SIGUSR2 swayosd-server
+fi
+
+echo "Starting swayosd-server..."
+swayosd-server &>/dev/null &
+disown

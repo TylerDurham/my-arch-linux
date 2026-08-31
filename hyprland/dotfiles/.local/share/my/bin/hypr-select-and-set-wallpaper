@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+
+wallpaper=$(hypr-select-wallpaper -d "$MY_WALLPAPER_DIR")
+
+# Nothing selected
+[ ! -n "$wallpaper" ] && exit 1
+
+# Grab the thumbnail for the notify msg
+thumbnail=$(sys-cache-thumbnail -i "$wallpaper")
+
+hypr-set-wallpaper -i "$wallpaper"
+# hypr-set-theme-colors -i "$wallpaper"
+
+# Restart services
+hypr-restart-theme
+
+notify-send \
+  "Theme Applied!" \
+  "Wallpaper update to '$wallpaper'!\n\nTheme primary color updated to match!" \
+  -i "$thumbnail"
