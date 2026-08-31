@@ -1,0 +1,21 @@
+help_text=$(cat <<EOF
+$(bold USAGE:) 
+
+  $(bold $(basename $0)) <package> [<package>] [-h] [-v] [-a] [-f <path-to-file>]
+
+$(bold DESCRIPTION:)
+
+  Uninstalls one or more packages. A list of packages can be specified in a file using the '-f' argument.
+
+  On Arch, packages are removed with pacman; pass '-a' to remove them with yay instead.
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+  -a, --aur        Remove using yay instead of pacman (Arch only)
+  -f, --filename   Path to a file with a list of packages
+EOF
+)
+
+echo "$help_text"

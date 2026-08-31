@@ -1,0 +1,6 @@
+# Follow the active my-hyprland theme. ~/.config/my/theme is a symlink that
+# hypr-set-current-theme repoints, so the palette below always matches the
+# desktop theme currently applied.
+#
+# Falls back to no colors (Ghostty defaults) if my-hyprland isn't installed.
+config-file = ?~/.config/my/theme/ghostty.conf

@@ -3,6 +3,8 @@
 set -euo pipefail
 
 declare -r REPO_ROOT="$(git rev-parse --show-toplevel)"
+export MY_LIB_DIR="$REPO_ROOT/shell/dotfiles/.local/share/my/lib"
+export PATH="$REPO_ROOT/shell/dotfiles/.local/share/my/bin:$PATH"
 
 #source "$REPO_ROOT/install.d/lib/envs.sh"
 source "$MY_LIB_DIR/bash/installer.sh"
@@ -31,13 +33,15 @@ completed() {
 }
 
 # GLOBALS
-SEARCH_PATH=
+SEARCH_PATH="./install.d/"
+PREFIX=my
 
 trap completed EXIT
 
 while [[ "$#" -gt 0 ]]; do 
   case "$1" in 
     -h|--help) ACTION="HELP"; shift; ;;
+    -d|--directory) SEARCH_PATH="$2"; shift 2 ;;
     -i|--install) OPTIONS=$(( OPTIONS | OPT_INSTALL )); shift; ;;
     -u|--uninstall) OPTIONS=$(( OPTIONS | OPT_UNINSTALL )); shift ;;
     -s|--select) OPTIONS=$(( OPTIONS | OPT_SELECT )); shift ;;
@@ -53,12 +57,19 @@ done
 # Sanity check
 source "./install.d/lib/prerequisites.sh"
 
+# # Install shell
+# info "Checking status of shell..."
+# mapfile -t shell_modules < <(sys-list-items "./install.d/shell/*.sh")
+# echo ${shell_modules[@]}
+# process_modules $OPTIONS "${shell_modules[@]}"
+# exit
+#
 # Set search path 
 if (( (OPTIONS & OPT_EXTRA) == OPT_EXTRA )); then
-  SEARCH_PATH=./install.d/extra/*.sh
+  SEARCH_PATH="$SEARCH_PATH/extra/*.sh"
   debug "Using extra search path '$SEARCH_PATH'."
 else
-  SEARCH_PATH="./install.d/*.sh"
+  SEARCH_PATH="$SEARCH_PATH/*.sh"
   debug "Using default search path '$SEARCH_PATH'."
 fi
 

@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+# ################################
+#
+# ███████╗███████╗██╗  ██╗██████╗ 
+# ██╔════╝██╔════╝██║  ██║██╔══██╗
+# ███████╗███████╗███████║██║  ██║
+# ╚════██║╚════██║██╔══██║██║  ██║
+# ███████║███████║██║  ██║██████╔╝
+# ╚══════╝╚══════╝╚═╝  ╚═╝╚═════╝ 
+#
+# ################################
+
+# replace_sshd_line(){
+#   local key="$1"
+#   local value="$2"
+#   local file="$3"
+#
+#   [ ! -f "$file" ] && echo "File '$file' not found!" && exit 1
+#
+#   if grep "^#\s*${key}" "$file" &>/dev/null; then
+#     echo "key '$key' set already!"
+#   else
+#     echo "Key '$key' not set!"
+#   fi
+#
+#   sed -i "s/^\(#\s*${key}\).*/\1 ${value}/" "$file"
+# }
+#
+# # if declare -f info &>/dev/null; then
+# #   echo "Function declated!"
+# # fi
+#
+
+sudo pacman -S --noconfirm --needed openssh
+
+sudo cp /etc/ssh/sshd_config /etc/ssh/sshd_config.bak
+
+config_file=/etc/ssh/sshd_config
+sudo sed -i 's/^#\(\s*AuthorizedKeysFile.*\)/\1/' "$config_file"
+sudo sed -i 's/^#\(\s*PasswordAuthentication.*\)/\1/' "$config_file"
+sudo sed -i 's/^#\(\s*PermitRootLogin.*\)/\1/' "$config_file"
+sudo sed -i 's/^#\(\s*PubkeyAuthentication.*\)/\1/' "$config_file"
+# sudo sed -i 's/#PermitRootLogin no/PermitRootLogin no/' $config_file
+# sudo sed -i 's/#PubkeyAuthentication yes/PermitRootLogin yes/' $config_file
+# sudo sed -i 's/#AuthorizedKeysFile .ssh\/authorized_keys/PermitRootLogin yes/' $config_file
+# config=$(cat << EOF 
+# # ADDED $(date)
+# PasswordAuthentication no
+# PubkeyAuthentication yes
+# AuthorizedKeysFile .ssh/authorized_keys
+# PermitRootLogin no
+# EOF
+# )
+#
+# echo "$config" >> /etc/ssh/sshd_config
+
+sudo ufw allow ssh
+sudo ufw reload
+
+sudo systemctl enable --now sshd
+
+

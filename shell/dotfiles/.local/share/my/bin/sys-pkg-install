@@ -1,0 +1,119 @@
+#!/usr/bin/env bash
+
+# #############################################################################
+#
+# ██████╗ ██╗  ██╗ ██████╗       ██╗███╗   ██╗███████╗████████╗ █████╗ ██╗     ██╗
+# ██╔══██╗██║ ██╔╝██╔════╝       ██║████╗  ██║██╔════╝╚══██╔══╝██╔══██╗██║     ██║
+# ██████╔╝█████╔╝ ██║  ███╗█████╗██║██╔██╗ ██║███████╗   ██║   ███████║██║     ██║
+# ██╔═══╝ ██╔═██╗ ██║   ██║╚════╝██║██║╚██╗██║╚════██║   ██║   ██╔══██║██║     ██║
+# ██║     ██║  ██╗╚██████╔╝      ██║██║ ╚████║███████║   ██║   ██║  ██║███████╗███████╗
+# ╚═╝     ╚═╝  ╚═╝ ╚═════╝       ╚═╝╚═╝  ╚═══╝╚══════╝   ╚═╝   ╚═╝  ╚═╝╚══════╝╚══════╝
+# =============================================================================
+# sys-pkg-install
+# =============================================================================
+# Installs one or more packages using the appropriate package manager for the
+# current OS. Skips packages that are already installed.
+#
+# USAGE:
+#   sys-pkg-install [-a] <package> [package...]
+#
+# EXAMPLE:
+#   sys-pkg-install git curl ripgrep
+#   sys-pkg-install -a 1password         # from the AUR, via yay
+#
+# SUPPORTED:
+#   arch   — pacman (yay with -a/--aur)
+#   macos  — brew
+#   ubuntu — apt-get
+#
+# DEPENDENCIES:
+#   sys-get-os, sys-pkg-check, logger.sh
+# =============================================================================
+
+# Libs
+dependancies=(logger err_codes)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
+
+usage() {
+source "$0.help"
+exit 1
+}
+
+declare -a PACKAGES
+AUR=
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--help)       usage ;;
+    -v|--verbose)    LOG_LEVEL=8; shift ;;
+    -a|--aur)        AUR=1; shift ;;
+    -f|--file)       PACKAGE_FILE=$2; shift 2 ;;
+    *)               PACKAGES+=($1); shift ;;
+  esac
+done
+
+OS=$(sys-get-os)
+
+get-install-cmd() {
+
+  case "$OS" in
+    # pacman covers the official repos; the AUR needs a helper, so -a/--aur
+    # swaps in yay (which runs sudo itself, unlike pacman).
+    arch)
+      if [[ -n "$AUR" ]]; then
+        echo "yay -S --needed --quiet --noconfirm"
+      else
+        echo "sudo pacman -S --needed --quiet --noconfirm"
+      fi
+      ;;
+    macos) echo "brew install" ;;
+    fedora) fatal 1 "Not implemented yet!" ;;
+    ubuntu) echo "sudo apt-get install -y" ;;
+  esac
+}
+
+if [[ -n "$AUR" ]]; then
+  if [[ "$OS" != "arch" ]]; then
+    warn "'--aur' has no effect on '$OS'; ignoring."
+    AUR=
+  else
+    command -v yay &>/dev/null \
+      || fatal 1 "'yay' not found; it is required for '--aur' installs."
+  fi
+fi
+
+# Load packages from the specified file
+if [[ -n "$PACKAGE_FILE" && -f "$PACKAGE_FILE" ]]; then
+  debug "Loading packages from '$PACKAGE_FILE'..."
+  mapfile -t PACKAGES < <(sed -e 's/#.*//g' -e '/^$/d' $PACKAGE_FILE)
+fi
+
+PACKAGE_COUNT=${#PACKAGES[@]}
+[ $PACKAGE_COUNT -eq 0 ] && error "No packages specified!" && usage
+debug "'$OS': $PACKAGE_COUNT packages to install."
+
+declare -a PACKAGES_TO_INSTALL
+
+for package in "${PACKAGES[@]}"; do
+  # Build an array of packages that DO NOT exist on the system
+  if sys-pkg-check "$package" "$OS" ; then
+    debug "Package $(bold "$(green "$package")") already installed. Nothing to do."
+  else
+    PACKAGES_TO_INSTALL+=($package)
+  fi
+done
+
+# Nothing left to do — bail before invoking the package manager, which would
+# otherwise ask for sudo just to report "no targets specified".
+if [[ ${#PACKAGES_TO_INSTALL[@]} -eq 0 ]]; then
+  debug "All $PACKAGE_COUNT packages already installed. Nothing to do."
+  exit 0
+fi
+
+# Build install command based on OS
+cmd=$(get-install-cmd)
+$cmd "${PACKAGES_TO_INSTALL[@]}" 
+
+

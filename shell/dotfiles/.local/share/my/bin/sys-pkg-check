@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+# #######################################################################
+#
+# ██████╗ ██╗  ██╗ ██████╗        ██████╗██╗  ██╗███████╗ ██████╗██╗  ██╗
+# ██╔══██╗██║ ██╔╝██╔════╝       ██╔════╝██║  ██║██╔════╝██╔════╝██║ ██╔╝
+# ██████╔╝█████╔╝ ██║  ███╗█████╗██║     ███████║█████╗  ██║     █████╔╝ 
+# ██╔═══╝ ██╔═██╗ ██║   ██║╚════╝██║     ██╔══██║██╔══╝  ██║     ██╔═██╗ 
+# ██║     ██║  ██╗╚██████╔╝      ╚██████╗██║  ██║███████╗╚██████╗██║  ██╗
+# ╚═╝     ╚═╝  ╚═╝ ╚═════╝        ╚═════╝╚═╝  ╚═╝╚══════╝ ╚═════╝╚═╝  ╚═╝
+# =============================================================================
+# sys-pkg-check
+# =============================================================================
+# Checks whether a package is installed on the current OS.
+#
+# USAGE:
+#   sys-pkg-check <package>
+#
+# RETURNS:
+#   0  — package is installed
+#   1  — package is not installed
+#
+# EXAMPLE:
+#   sys-pkg-check git && echo "git is installed"
+#
+# DEPENDENCIES:
+#   sys-get-os, logger.sh
+# =============================================================================
+
+usage() {
+  echo "USAGE: $0 <package>"
+  exit 1
+}
+
+os=$(sys-get-os)
+[ -z "$os" ] && os="$2"
+
+package="$1"
+
+[ -z "$package" ] && echo "No package specified!" && usage 
+[ -z "$os" ] && echo "No OS specified!" && usage
+
+case "$os" in
+  arch)
+    # pacman's local db covers AUR packages too, so this works without yay.
+    pacman -Q "$package" &>/dev/null || exit 1
+    ;;
+
+  ubuntu)
+    dpkg -s "$package" &>/dev/null || exit 1
+    ;;
+
+  *)
+    echo "Not implemented yet for '$os'!"
+    exit 1
+    ;;
+esac
+
+exit 0
+

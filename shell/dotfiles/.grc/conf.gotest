@@ -1,0 +1,28 @@
+// Source - https://stackoverflow.com/a/40160711
+// Posted by Alexander Staubo, modified by community. See post 'Timeline' for change history
+// Retrieved 2026-07-17, License - CC BY-SA 4.0
+
+# go-test grc colorizer configuration
+regexp==== RUN .*
+colour=bright_blue
+-
+regexp=--- PASS: .* (\(\d+\.\d+s\))
+colour=green, black
+-
+regexp=^PASS$
+colour=bold black green
+-
+regexp=^(ok|FAIL)\s+.*
+colour=default, magenta
+-
+regexp=\s+expected
+colour=bold green
+-
+regexp=--- FAIL: .* (\(\d+\.\d+s\))
+colour=red, black
+-
+regexp=^FAIL$
+colour=bold white red
+-
+regexp=[^\s]+\.go(:\d+)?
+colour=cyan

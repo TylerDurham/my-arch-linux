@@ -1,0 +1,21 @@
+help_text=$(cat <<EOF
+$(bold USAGE:) 
+
+  $(bold $(basename $0)) <package> [<package>] [-h] [-v] [-a] [-f <path-to-file>]
+
+$(bold DESCRIPTION:)
+
+  Installs one or more packages. A list of packages can be specified in a file using the '-f' argument.
+
+  On Arch, packages come from the official repos via pacman; pass '-a' to install from the AUR with yay instead.
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+  -a, --aur        Install from the AUR using yay (Arch only)
+  -f, --filename   Path to a file with a list of packages
+EOF
+)
+
+echo "$help_text"

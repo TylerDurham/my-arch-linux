@@ -1,0 +1,59 @@
+#!/usr/bin/env bash
+
+# OS_ICONS — maps a lowercase OS key (as returned by detect_os) to a Nerd Font
+# glyph escape. Values are stored as "\uXXXX" strings; expand them at use time
+# with printf '%b' (see the lookup helper at the bottom).
+#
+# NOTE: associative arrays require bash 4+. macOS ships bash 3.2 at /bin/bash,
+# so run this under a modern bash (e.g. Homebrew's) if you target macOS.
+ 
+declare -A OS_ICONS=(
+    # --- Non-Linux / generic ---
+    [windows]="\uf17a"       # fa-windows (Font Logos has no Windows glyph)
+    [macos]=""         # linux-apple (consistent w/ the Font Logos set)
+    [freebsd]="\uf30c"
+    [openbsd]="\uf328"       # detect_os can emit this; netbsd has no FL glyph
+    [unknown]="\uf109"       # fa-laptop — fallback for detect_os "unknown"
+                             # alt generic Linux: \uf17c (Tux) or \uf31a (linux-tux)
+ 
+    # --- Thekones you asked for ---
+    [arch]="\uf303"
+    [nixos]="\uf313"
+    [fedora]="\uf30a"
+    [gentoo]="\uf30d"
+    [mint]="\uf30e"          # detect_os normalizes linuxmint -> mint
+ 
+    # --- Common extras ---
+    [debian]="\uf306"
+    [ubuntu]="\uf31b"
+    [manjaro]="\uf312"
+    [opensuse]="\uf314"
+    [redhat]="\uf316"        # detect_os normalizes rhel -> redhat
+    [centos]="\uf304"
+    [almalinux]="\uf31d"
+    [rocky]="\uf32b"
+    [pop_os]="\uf32a"        # detect_os normalizes pop -> pop_os
+    [elementary]="\uf309"
+    [endeavour]="\uf322"     # detect_os normalizes endeavouros -> endeavour
+    [alpine]="\uf300"
+    [void]="\uf32e"
+    [artix]="\uf31f"
+    [devuan]="\uf307"
+    [deepin]="\uf321"
+    [solus]="\uf32d"
+    [zorin]="\uf32f"
+    [kali]="\uf327"
+    [raspberry_pi]="\uf315"  # detect_os normalizes raspbian -> raspberry_pi
+    [guix]="\uf325"          # linux-gnu_guix
+    [mx]="\uf33f"            # linux-mxlinux
+    [garuda]="\uf337"
+    [slackware]="\uf318"
+)
+ 
+# Lookup helper: print the glyph for the current OS, falling back to "unknown".
+os_icon() {
+    local os="${1:-$(sys-get-os)}"
+    printf '%b' "${OS_ICONS[$os]:-${OS_ICONS[unknown]}}"
+}
+
+os_icon
