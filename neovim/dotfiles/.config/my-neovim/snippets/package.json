@@ -1,0 +1,26 @@
+{
+  "name": "my-neovim-snippets",
+  "version": "1.0.0",
+  "description": "Personal VSCode-style snippets loaded by blink.cmp",
+  "engines": {
+    "vscode": "^1.11.0"
+  },
+  "contributes": {
+    "snippets": [
+      {
+        "language": [
+          "sh",
+          "bash",
+          "zsh"
+        ],
+        "path": "./shell.json"
+      },
+      {
+        "language": [
+          "go"
+        ],
+        "path": "./go.json"
+      }
+    ]
+  }
+}
