@@ -1,0 +1,159 @@
+#!/usr/bin/env bash
+
+#  Find (and optionally remove) paths under a target directory that would
+#  block `stow` from adopting a source (stow package) directory.
+#
+#  Walks SOURCE recursively. For every path found, the corresponding path
+#  under TARGET "blocks" a stow when it already exists there as something
+#  other than a symlink pointing back into SOURCE - a real file, a real
+#  directory standing where SOURCE expects a file, or a symlink left over
+#  from some other source. Paths already correctly stowed are left alone.
+#
+#  By default nothing is touched; pass -d/--delete or -b/--backup to clean.
+#  Combine either with -n/--dry-run to preview what that flag would do.
+#
+#    -d, --delete    remove blocking paths
+#    -b, --backup    move blocking paths to '<path>.backup' instead of
+#                     removing them (falls back to a timestamped suffix if
+#                     that already exists)
+#    -n, --dry-run   list what would be cleaned; changes nothing (default
+#                     when neither -d nor -b is given)
+#    -v, --verbose   raise LOG_LEVEL to 8 for debug tracing
+#
+#  USAGE:
+#    stow-clean [options] <source> [target]
+#
+#  EXAMPLE:
+#    stow-clean ./shell/dotfiles ~              # dry-run, list only
+#    stow-clean -d ./shell/dotfiles ~            # delete blockers
+#    stow-clean -b ./shell/dotfiles ~            # back up blockers
+#
+#  Exits ENOENT when <source> does not exist.
+
+set -uo pipefail
+
+# Libs
+dependancies=(logger err_codes)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
+
+usage() {
+  echo ""
+  fmt_badge BLUE "$(basename $0): "
+  sed -n '3,31p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+  exit 1
+}
+
+MODE=list   # list | delete | backup
+DRY_RUN=
+
+while [[ "$#" -gt 0 ]]; do
+  case "$1" in
+    -h|--help)      usage ;;
+    -v|--verbose)   LOG_LEVEL=8; shift ;;
+    -d|--delete)    MODE=delete; shift ;;
+    -b|--backup)    MODE=backup; shift ;;
+    -n|--dry-run)   DRY_RUN=1; shift ;;
+    --)             shift; break ;;
+    -*)             error "Unknown option '$1'."; usage ;;
+    *)              break ;;
+  esac
+done
+
+SOURCE="${1:-}"
+TARGET="${2:-$HOME}"
+
+[[ -z "$SOURCE" ]] && error "No source directory specified." && usage
+[[ -d "$SOURCE" ]] || fatal $ENOENT "Source directory '$SOURCE' not found."
+[[ -d "$TARGET" ]] || fatal $ENOENT "Target directory '$TARGET' not found."
+
+# Trim trailing slashes so relative-path arithmetic below ("${entry#$SOURCE/}")
+# lines up regardless of how the caller wrote the paths.
+SOURCE="${SOURCE%/}"
+TARGET="${TARGET%/}"
+
+declare -a BLOCKED_PATHS=() BLOCKED_REASONS=()
+
+# Records one blocking path + a human-readable reason for the report below.
+record_blocker() {
+  BLOCKED_PATHS+=("$1")
+  BLOCKED_REASONS+=("$2")
+  debug "$1" 2>&1 | indent 2
+}
+
+# Recursively compares $1 (a directory under SOURCE) against its counterpart
+# under TARGET, recording every blocking path it finds. Skips descending into
+# a subtree once its own root is found to be blocking - there is nothing left
+# to learn underneath a directory stow can't even reach.
+walk() {
+  local src_dir="$1" entry rel_path target_path resolved_target resolved_src
+
+  while IFS= read -r -d '' entry; do
+    rel_path="${entry#$SOURCE/}"
+    target_path="$TARGET/$rel_path"
+
+    [[ -e "$target_path" || -L "$target_path" ]] || continue
+
+    if [[ -L "$target_path" ]]; then
+      resolved_target="$(readlink -f -- "$target_path" 2>/dev/null)"
+      resolved_src="$(readlink -f -- "$entry" 2>/dev/null)"
+      if [[ -n "$resolved_target" && "$resolved_target" == "$resolved_src" ]]; then
+        continue   # already correctly stowed - a leaf, nothing to descend into
+      fi
+      record_blocker "$target_path" "symlink points elsewhere"
+      continue
+    fi
+
+    if [[ -d "$entry" ]]; then
+      if [[ ! -d "$target_path" ]]; then
+        record_blocker "$target_path" "file (expected directory)"
+        continue   # subtree unreachable for stow; nothing more to record here
+      fi
+      walk "$entry"
+    else
+      record_blocker "$target_path" "$([[ -d "$target_path" ]] && echo "directory (expected file)" || echo "file")"
+    fi
+  done < <(find "$src_dir" -mindepth 1 -maxdepth 1 ! -name '.git' -print0 | sort -z)
+}
+
+info "Scanning '$SOURCE' against '$TARGET'..."
+walk "$SOURCE"
+
+if [[ ${#BLOCKED_PATHS[@]} -eq 0 ]]; then
+  success "Nothing blocks a stow of '$SOURCE' into '$TARGET'."
+  exit 0
+fi
+
+warn "Found ${#BLOCKED_PATHS[@]} path(s) blocking a stow:"
+for i in "${!BLOCKED_PATHS[@]}"; do
+  { yellow "${BLOCKED_PATHS[$i]}"; echo -n "  -  "; dim "${BLOCKED_REASONS[$i]}"; echo; } | indent 2
+done
+
+if [[ "$MODE" == "list" || -n "$DRY_RUN" ]]; then
+  case "$MODE" in
+    delete) info "Dry-run: would delete the path(s) above." ;;
+    backup) info "Dry-run: would back up the path(s) above." ;;
+    list)   info "Dry-run by default; pass -d/--delete or -b/--backup to clean these up." ;;
+  esac
+  exit 0
+fi
+
+case "$MODE" in
+  delete)
+    for path in "${BLOCKED_PATHS[@]}"; do
+      rm -rf -- "$path" \
+        && success "Deleted '$path'." \
+        || error "Failed to delete '$path'."
+    done
+    ;;
+  backup)
+    for path in "${BLOCKED_PATHS[@]}"; do
+      dest="$path.backup"
+      [[ -e "$dest" ]] && dest="$path.backup.$(date +%Y%m%d%H%M%S)"
+      mv -- "$path" "$dest" \
+        && success "Backed up '$path' -> '$dest'." \
+        || error "Failed to back up '$path'."
+    done
+    ;;
+esac
