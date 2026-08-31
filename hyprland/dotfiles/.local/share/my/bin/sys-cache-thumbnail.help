@@ -1,0 +1,22 @@
+
+
+help_text=$(cat <<EOF
+$(bold USAGE:) 
+
+  $(bold $(basename $0)) -i path [-h] [-v] [-c]
+
+$(bold DESCRIPTION:)
+
+  Generates a thumbnail from '-i' and caches it at '$CACHE_DIR'. If '-i' is a directory, 
+  the first image file found in the directory will be used for the thumbnail.
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+  -c, --clean      Clean all thumbnails from the cache
+  -i, --image      The image to cache as a thumbnail 
+EOF
+)
+
+echo "$help_text"

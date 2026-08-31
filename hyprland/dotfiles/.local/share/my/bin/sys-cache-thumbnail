@@ -1,0 +1,71 @@
+#!/usr/bin/env bash
+
+# Libs
+dependancies=(logger err_codes)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
+
+usage() {
+  source "$0.help"
+  exit 1
+}
+
+# Location of the thumbnail directory. Go ahead and create it
+CACHE_DIR="$HOME/.cache/my-thumbnails"
+[[ ! -d "$CACHE_DIR" ]] && mkdir -p "$CACHE_DIR"
+
+# Parse options and arguments
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -h | --help) usage ;;
+  -v | --verbose)
+    LOG_LEVEL=8
+    shift
+    ;;
+  -i | --image)
+    IMAGE="$2"
+    shift 2
+    ;;
+  -c | --clean) rm -rf "$CACHE_DIR" && exit 0 ;;
+  *) break ;;
+  esac
+done
+
+get_dir_image() {
+
+  path="${1%/}" # Remove trailing slashes
+  for img in "$path"/*.jpg "$path"/*.jpeg "$path"/*.png; do
+    echo "$img"
+    return 0
+  done
+
+  echo $path
+  return 1
+}
+
+if [ -n "$IMAGE" ]; then
+
+  src_image="$IMAGE"
+
+  [[ -d "$IMAGE" ]] && debug "'$IMAGE' exists as directory" || debug "'$IMAGE' is NOT a directory"
+  [[ -f "$IMAGE" ]] && debug "'$IMAGE' exists as file" || debug "'$IMAGE' is NOT a file"
+  [[ -L "$IMAGE" ]] && debug "'$IMAGE' exists as symlink" || debug "'$IMAGE' is NOT a symlink"
+
+  if [ -d "$IMAGE" ]; then
+    # We were passed a directory. Grab the first image file.
+    debug "'$IMAGE' is a directory! Grabbing first image..."
+    src_image=$(get_dir_image "$IMAGE")
+  fi
+
+  # Generate a unique filename based on hash. Strip trailing "  -"
+  hashed_name=$(echo "$src_image" | sha256sum | awk '{print $1}')
+  thumbnail="$CACHE_DIR/$hashed_name.jpg"
+
+  [[ ! -f "$thumbnail" ]] && magick "$src_image" -thumbnail 400x400^ -gravity center -extent 400x400 "$thumbnail" && debug "'$thumbnail' created!"
+
+  echo "$thumbnail"
+
+else
+  usage
+fi
