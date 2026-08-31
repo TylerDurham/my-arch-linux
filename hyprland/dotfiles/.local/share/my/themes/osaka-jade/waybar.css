@@ -1,0 +1,27 @@
+/* UI Colors */
+@define-color accent1           #509475; /* Jade — keywords, highlights */
+@define-color accent2           #2DD5B7; /* Teal — functions, types */
+@define-color cursor            #D7C995; /* Sand — cursor */
+@define-color foreground        #C1C497; /* Pale olive — primary text */
+@define-color background        #111C18; /* Deep jade — editor background */
+@define-color selection_fg      #C1C497; /* Same as foreground */
+@define-color selection_bg      #2C4536; /* Lifted jade — selection */
+
+/* Text colors */
+@define-color text1             #C1C497; /* Primary text — same as foreground */
+@define-color text2             #8A9679; /* Muted text — comments, secondary */
+@define-color text3             #53685B; /* Subtle text — disabled, placeholders */
+
+/* Surface colors */
+@define-color surface1          #17251E; /* Slightly lifted surface — sidebars */
+@define-color surface2          #1D2E25; /* Mid surface — input backgrounds, cards */
+@define-color surface3          #23372B; /* Raised surface — hover states, borders */
+
+/* Named colors */
+@define-color red               #FF5345; /* Red — errors, deletions */
+@define-color green             #63B07A; /* Green — strings, additions */
+@define-color blue              #ACD4CF; /* Pale cyan — constants, links */
+@define-color orange            #D7C995; /* Sand — keywords, warnings */
+@define-color yellow            #E5C736; /* Yellow — attributes, tags */
+@define-color purple            #D2689C; /* Pink — builtins, specials */
+@define-color cyan              #2DD5B7; /* Teal — functions, types */

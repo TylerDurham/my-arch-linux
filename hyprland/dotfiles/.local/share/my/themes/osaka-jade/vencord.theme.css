@@ -1,0 +1,29 @@
+/**
+* @name base16 Discord
+* @author @bypass_
+* @version 0.1.0
+* @description Built using Osaka Jade
+* @source https://github.com/imbypass/base16-Discord
+**/
+
+/* import the parent */
+@import url('https://imbypass.github.io/base16-discord/omarchy-discord.theme.css');
+
+:root {
+    --color00: #111c18;
+    --color01: #ff5345;
+    --color02: #549e6a;
+    --color03: #459451;
+    --color04: #509475;
+    --color05: #d2689c;
+    --color06: #2dd5b7;
+    --color07: #f6f5dd;
+    --color08: #53685b;
+    --color09: #db9f9c;
+    --color10: #63b07a;
+    --color11: #e5c736;
+    --color12: #acd4cf;
+    --color13: #75bbb3;
+    --color14: #8cd3cb;
+    --color15: #9eebb3;
+}

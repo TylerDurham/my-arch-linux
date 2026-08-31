@@ -1,0 +1,29 @@
+/**
+* @name base16 Discord
+* @author @bypass_
+* @version 0.1.0
+* @description Built using Everforest Dark
+* @source https://github.com/imbypass/base16-Discord
+**/
+
+/* import the parent */
+@import url('https://imbypass.github.io/base16-discord/omarchy-discord.theme.css');
+
+:root {
+    --color00: #2d353b;
+    --color01: #e67e80;
+    --color02: #a7c080;
+    --color03: #dbbc7f;
+    --color04: #7fbbb3;
+    --color05: #d699b6;
+    --color06: #83c092;
+    --color07: #d3c6aa;
+    --color08: #859289;
+    --color09: #e67e80;
+    --color10: #a7c080;
+    --color11: #dbbc7f;
+    --color12: #7fbbb3;
+    --color13: #d699b6;
+    --color14: #83c092;
+    --color15: #d3c6aa;
+}

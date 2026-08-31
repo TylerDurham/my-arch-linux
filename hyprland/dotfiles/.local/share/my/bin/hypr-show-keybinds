@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+$HOME/.local/share/my/bin/hypr-get-keybinds | rofi -dmenu \
+  -i \
+  -p "Hyprland Keybinds" \
+  -width 600 \
+  -theme ~/.config/rofi/simple.rasi \
+  -kb-accept-entry "" -kb-accept-custom "" -kb-accept-alt ""

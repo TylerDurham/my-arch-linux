@@ -1,0 +1,20 @@
+
+config-file = ?auto/theme.ghostty
+
+window-padding-x = 10
+window-padding-y = 10
+
+# keybinds
+
+keybind = shift+ctrl+h=previous_tab
+keybind = shift+ctrl+l=next_tab
+keybind = ctrl+shift+comma=reload_config
+keybind = ctrl+shift+x=close_tab
+
+# Don't nag me when closing ghostty... just do it.
+confirm-close-surface = false
+
+shell-integration-features = ssh-terminfo,ssh-env
+
+# Allow local overrides
+config-file = ?local.ghostty

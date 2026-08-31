@@ -1,0 +1,131 @@
+#!/usr/bin/env bash
+# All-purpose rofi launcher wrapper.
+#
+# Usage:
+#   launch-rofi [OPTIONS] [-- ROFI_ARGS...]
+#
+# Options:
+#   --mode MODE        rofi mode: drun (default), run, dmenu, window, filebrowser,
+#                      or script:/path/to/script for custom script modes
+#   --prompt TEXT      custom prompt label
+#   --lines N          number of visible rows (default: 8)
+#   --icons            show icons (default)
+#   --no-icons         hide icons
+#   --grid             grid layout (vertical icon+label cells, 5 columns)
+#   --columns N        set column count (implies --grid)
+#   --wide             widen window to 900px
+#   --                 everything after this is passed directly to rofi
+
+ICON_THEME=$(gsettings get org.gnome.desktop.interface icon-theme | tr -d "'")
+ICON_DIR="$HOME/.local/share/my/icons/"
+
+THEME="$HOME/.config/rofi/applications.rasi"
+[[ ! -t 0 ]] && MODE="dmenu" || MODE="drun"
+PROMPT=""
+LINES=""
+ICONS="true"
+WIDTH=""
+GRID="false"
+COLUMNS=""
+CASE_INSENSITIVE="true"
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+  --mode)
+    MODE="$2"
+    shift 2
+    ;;
+  --mode=*)
+    MODE="${1#*=}"
+    shift
+    ;;
+  --prompt)
+    PROMPT="$2"
+    shift 2
+    ;;
+  --prompt=*)
+    PROMPT="${1#*=}"
+    shift
+    ;;
+  --lines)
+    LINES="$2"
+    shift 2
+    ;;
+  --lines=*)
+    LINES="${1#*=}"
+    shift
+    ;;
+  --icons)
+    ICONS="true"
+    shift
+    ;;
+  --no-icons)
+    ICONS="false"
+    shift
+    ;;
+  --grid)
+    GRID="true"
+    shift
+    ;;
+  --case-sensitive)
+    CASE_INSENSITIVE="false"
+    shift
+    ;;
+  --columns)
+    COLUMNS="$2"
+    GRID="true"
+    shift 2
+    ;;
+  --columns=*)
+    COLUMNS="${1#*=}"
+    GRID="true"
+    shift
+    ;;
+  --wide)
+    WIDTH="900px"
+    shift
+    ;;
+  --)
+    shift
+    break
+    ;;
+  *) break ;;
+  esac
+done
+
+THEME_OVERRIDES="configuration { show-icons: ${ICONS}; icon-theme: '${ICON_THEME}';}"
+[[ -n "$LINES" ]] && THEME_OVERRIDES+=" listview { lines: ${LINES}; }"
+
+if [[ "$GRID" == "true" ]]; then
+  _cols="${COLUMNS:-4}"
+  [[ -z "$WIDTH" ]] && WIDTH="900px"
+  THEME_OVERRIDES+=" listview { columns: ${_cols}; fixed-columns: true; spacing: 12px; padding: 16px; }"
+  THEME_OVERRIDES+=" element { orientation: vertical; spacing: 6px; padding: 12px 8px; cursor: pointer; }"
+  THEME_OVERRIDES+=" element-icon { size: 48px; cursor: inherit; }"
+  THEME_OVERRIDES+=" element-text { horizontal-align: 0.5; cursor: inherit; }"
+fi
+
+[[ -n "$WIDTH" ]] && THEME_OVERRIDES+=" window { width: ${WIDTH}; }"
+
+if [[ "$MODE" == "dmenu" ]]; then
+  ROFI_ARGS=(-dmenu)
+elif [[ "$MODE" == script:* ]]; then
+  SCRIPT_PATH="${MODE#script:}"
+  SCRIPT_NAME="$(basename "$SCRIPT_PATH" | tr -d ' ')"
+  ROFI_ARGS=(-show "$SCRIPT_NAME" -modi "${SCRIPT_NAME}:${SCRIPT_PATH}")
+else
+  ROFI_ARGS=(-show "$MODE")
+fi
+
+if [[ "$CASE_INSENSITIVE" == "true" ]]; then
+  ROFI_ARGS+=(-i)
+fi
+
+ROFI_ARGS+=(
+  -theme "$THEME"
+  -theme-str "$THEME_OVERRIDES"
+)
+
+[[ -n "$PROMPT" ]] && ROFI_ARGS+=(-p "$PROMPT")
+
+exec rofi "${ROFI_ARGS[@]}" "$@"

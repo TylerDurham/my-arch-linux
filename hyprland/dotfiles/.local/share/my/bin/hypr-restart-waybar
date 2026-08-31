@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+if pgrep waybar; then
+  pkill waybar
+  waybar -l off &>/dev/null &
+  disown
+else
+  waybar -l off &>/dev/null &
+  disown
+fi

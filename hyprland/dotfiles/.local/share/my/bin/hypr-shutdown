@@ -1,0 +1,3 @@
+#!/usr/bin/env bash
+
+hyprshutdown -p "shutdown now"

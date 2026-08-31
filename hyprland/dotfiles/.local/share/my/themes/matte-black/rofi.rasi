@@ -1,0 +1,31 @@
+* {
+  /* UI Colors */
+  accent1:            #E68E0D;  /* Amber — keywords, highlights */
+  accent2:            #FFC107;  /* Bright amber — functions, types */
+  cursor:             #EAEAEA;  /* Near white — cursor */
+  foreground:         #BEBEBE;  /* Light grey — primary text */
+  background:         #121212;  /* Matte black — editor background */
+  background-trans:   #121212BB;/* Matte black — editor background */
+  selection-fg:       #BEBEBE;  /* Same as foreground */
+  selection-bg:       #515151;  /* Mid grey — selection */
+
+  /* Text colors */
+  text1:              #BEBEBE;  /* Primary text — same as foreground */
+  text2:              #8A8A8D;  /* Muted text — comments, secondary */
+  text3:              #6E6E70;  /* Subtle text — disabled, placeholders */
+
+  /* Surface colors */
+  surface1:           #1D1D1D;  /* Slightly lifted surface — sidebars */
+  surface2:           #282828;  /* Mid surface — input backgrounds, cards */
+  surface3:           #333333;  /* Raised surface — hover states, borders */
+
+  /* Named colors */
+  red:                #D35F5F;  /* Muted red — errors, deletions */
+  green:              #F59E0B;  /* Amber — strings, additions (no green in palette) */
+  green-trans:        #F59E0BAA;/* Amber — strings, additions (no green in palette) */
+  blue:               #8A8A8D;  /* Grey — constants, links (no blue in palette) */
+  orange:             #E68E0D;  /* Amber — keywords, warnings */
+  yellow:             #FFC107;  /* Bright amber — attributes, tags */
+  purple:             #D35F5F;  /* Muted red — builtins, specials (no purple in palette) */
+  cyan:               #EAEAEA;  /* Near white — functions, types (no cyan in palette) */
+}

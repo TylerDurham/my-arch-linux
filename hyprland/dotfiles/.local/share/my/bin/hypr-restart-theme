@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+hypr-restart-waybar
+hypr-restart-swayosd
+hypr-restart-swaync
+
+# Ghostty includes ~/.config/my/theme/ghostty.conf, so it only needs to
+# re-read its config. SIGUSR2 is its documented reload signal; no match
+# simply means no terminals are open.
+pkill -USR2 -x ghostty || true
+
+hyprctl reload

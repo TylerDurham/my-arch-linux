@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+#  Expand glob patterns into the list of paths they match.
+#
+#  Takes one or more patterns as positional args and writes every match to
+#  stdout, one per line. Quote a pattern to have this script expand it; leave
+#  it unquoted and the calling shell expands it first. All logging goes to
+#  stderr, so stdout stays a clean list ready to pipe into fzf.
+#
+#    -v, --verbose   raise LOG_LEVEL to 16 for debug tracing
+#
+#  USAGE:
+#    sys-list-items './install.d/*.sh'
+#
+#  Exits ENOENT when nothing matches.
+
+set -uo pipefail
+
+# libs
+dependancies=(logger err_codes)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
+
+# Called when script exits
+completed() {
+  (( LOG_LEVEL >= 8 )) && {
+    echo "" >&2
+    debug_badge "$(basename $0)"
+    debug "SEARCH_PATTERN: ${SEARCH_PATTERN}" 2>&1 | indent 2 # >&2
+    echo "" >&2
+  }
+}
+
+usage() {
+  echo ""
+  fmt_badge BLUE "$(basename $0): "
+  sed -n '3,15p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+}
+
+SEARCH_PATTERN=   # The search pattern to find files...
+
+trap completed EXIT
+
+while [[ "$#" -gt 0 ]]; do 
+  case "$1" in
+    -v|--verbose) export LOG_LEVEL=16; shift ;;
+    -h|--help) usage; exit 1 ;;
+    *) SEARCH_PATTERN="$1"; shift ;;
+  esac 
+done
+
+# Unpack search pattern into a glob
+glob=( $SEARCH_PATTERN )
+
+# Ensure we got valid matches
+if (( ${#glob[@]} == 1 )) && [[ ! -e "${glob[0]}" ]]; then
+  fatal $ENOENT "Nothing matched for pattern '$SEARCH_PATTERN'!"
+fi
+
+for module in ${glob[@]}; do 
+  printf '%s\n' "$module"
+done

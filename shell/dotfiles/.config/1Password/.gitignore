@@ -1,0 +1,11 @@
+# ~/.config/1Password symlinks to this directory, so the running app writes its
+# live state here: sqlite DBs and their -shm/-wal siblings, Electron caches,
+# window geometry, trust tokens. None of that belongs in version control.
+#
+# Deny everything, then allow back only what we actually want versioned.
+# `ssh/` must be un-ignored before `ssh/agent.toml`: git will not descend into
+# an excluded directory, so a bare `!ssh/agent.toml` would never match.
+*
+!.gitignore
+!ssh/
+!ssh/agent.toml

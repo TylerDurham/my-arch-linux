@@ -1,0 +1,121 @@
+#!/usr/bin/env bash
+
+# ollama-prompt.sh
+# Calls a local Ollama instance with a specified model, system prompt, and user prompt.
+#
+# Usage:
+#   ./ollama-prompt.sh -m MODEL -s "SYSTEM_PROMPT" -p "USER_PROMPT"
+#   ./ollama-prompt.sh -m llama3.1 -s "You are a terse assistant." -p "What is a VLAN?"
+#
+# You can also pipe the user prompt in via stdin instead of -p:
+#   echo "What is a VLAN?" | ./ollama-prompt.sh -m llama3.1 -s "You are terse."
+#
+# Requires: curl, jq
+# Assumes Ollama is running locally on the default port (11434).
+# Override with OLLAMA_HOST=http://host:port if needed.
+
+set -euo pipefail
+
+OLLAMA_HOST="${OLLAMA_HOST:-http://localhost:11434}"
+
+MODEL=""
+SYSTEM_PROMPT=""
+USER_PROMPT=""
+STREAM=false
+
+usage() {
+    cat <<EOF
+Usage: $(basename "$0") -m MODEL -s SYSTEM_PROMPT [-p USER_PROMPT] [--stream]
+
+  -m, --model      Model name to use (e.g. llama3.1, mistral, qwen2.5)
+  -s, --system     System prompt text
+  -p, --prompt     User prompt text (optional if piping via stdin)
+  --stream         Stream the response as it's generated (raw JSON lines)
+  -h, --help       Show this help message
+
+Environment:
+  OLLAMA_HOST      Ollama API base URL (default: http://localhost:11434)
+EOF
+    exit 1
+}
+
+# --- Parse arguments ---
+while [[ $# -gt 0 ]]; do
+    case "$1" in
+        -m|--model)
+            MODEL="$2"
+            shift 2
+            ;;
+        -s|--system)
+            SYSTEM_PROMPT="$2"
+            shift 2
+            ;;
+        -p|--prompt)
+            USER_PROMPT="$2"
+            shift 2
+            ;;
+        --stream)
+            STREAM=true
+            shift
+            ;;
+        -h|--help)
+            usage
+            ;;
+        *)
+            echo "Unknown option: $1" >&2
+            usage
+            ;;
+    esac
+done
+
+# --- Validate ---
+if [[ -z "$MODEL" ]]; then
+    echo "Error: model is required (-m)" >&2
+    usage
+fi
+
+if [[ -z "$USER_PROMPT" ]]; then
+    if [[ ! -t 0 ]]; then
+        USER_PROMPT="$(cat)"
+    fi
+fi
+
+if [[ -z "$USER_PROMPT" ]]; then
+    echo "Error: user prompt is required (-p, or piped via stdin)" >&2
+    usage
+fi
+
+for cmd in curl jq; do
+    if ! command -v "$cmd" &>/dev/null; then
+        echo "Error: '$cmd' is required but not installed." >&2
+        exit 1
+    fi
+done
+
+# --- Build JSON payload safely with jq ---
+PAYLOAD=$(jq -n \
+    --arg model "$MODEL" \
+    --arg system "$SYSTEM_PROMPT" \
+    --arg prompt "$USER_PROMPT" \
+    --argjson stream "$STREAM" \
+    '{model: $model, system: $system, prompt: $prompt, stream: $stream}')
+
+# --- Call Ollama ---
+if [[ "$STREAM" == true ]]; then
+    # Raw streaming output (one JSON object per line)
+    curl -sS -N "${OLLAMA_HOST}/api/generate" \
+        -H "Content-Type: application/json" \
+        -d "$PAYLOAD"
+else
+    RESPONSE=$(curl -sS "${OLLAMA_HOST}/api/generate" \
+        -H "Content-Type: application/json" \
+        -d "$PAYLOAD")
+
+    # Surface API errors clearly
+    if echo "$RESPONSE" | jq -e '.error' &>/dev/null; then
+        echo "Ollama API error: $(echo "$RESPONSE" | jq -r '.error')" >&2
+        exit 1
+    fi
+
+    echo "$RESPONSE" | jq -r '.response'
+fi

@@ -1,0 +1,111 @@
+#!/usr/bin/env bash
+
+# Libs
+if ! . "$MY_LIB_DIR/bash/require.sh" logger; then
+  echo "Could not load libraries from '$MY_LIB_DIR'!" >&2
+  exit 1
+fi
+
+# Parse inputs
+usage() {
+  source "$0.help"
+  exit 1
+}
+
+WALLPAPER_DIR=$MY_WALLPAPER_DIR # || ~/Pictures/
+THEME_OVERRIDES=""
+THEME_OVERRIDES="configuration { show-icons: ${ICONS}; icon-theme: '${ICON_THEME}';}"
+THEME_OVERRIDES+=" listview { columns: 4; lines: 5; layout: horizontal; spacing: 12px; padding: 16px; }"
+THEME_OVERRIDES+=" element { orientation: horizontal; spacing: 6px; padding: 12px 8px; }"
+THEME_OVERRIDES+=" element-icon { size: 100px; }"
+THEME_OVERRIDES+=" element-text { horizontal-align: 0.5; }"
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -h | --help) usage ;;
+  -v | --verbose)
+    LOG_LEVEL=8
+    shift
+    ;;
+  -d | --directory)
+    WALLPAPER_DIR="$2"
+    shift 2
+    ;;
+  -*)
+    echo "Unknown option: $1" >&2
+    usage
+    ;;
+  *) break ;;
+  esac
+done
+
+# Directory passed in does not exist... do not proceed
+[ ! -d "$WALLPAPER_DIR" ] && fatal "Wallpaper directory '$WALLPAPER_DIR' does not exist!"
+
+# Remove trailing slashes
+WALLPAPER_DIR="${WALLPAPER_DIR%/}"
+
+# Rofi state management
+# Mapping that maps basename of a directory/file to it's full path
+declare -A PATH_MAPPINGS
+
+while IFS= read -r image_path; do
+  # Calculate short filename and add to our mapping
+  filename=$(basename $image_path)
+  PATH_MAPPINGS["$filename"]="$image_path"
+
+done < <(
+  # Get a list of directories and image files
+  find "$WALLPAPER_DIR/" -maxdepth 1 \( ! -name ".*" \) \
+    \( -type d \) -o \( -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.svg" \) \)
+)
+
+declare rofi_lines
+orig_log_level=$LOG_LEVEL
+
+for filename in ${!PATH_MAPPINGS[@]}; do
+
+  # Lookup full path from our mapping
+  image_path=${PATH_MAPPINGS[$filename]}
+
+  if [ "$WALLPAPER_DIR" != "${image_path%/}" ]; then
+    # Don't add current directory to ROFI
+    LOG_LEVEL=2
+    icon=$(sys-cache-thumbnail -i "$image_path")
+    LOG_LEVEL=$orig_log_level
+    rofi_lines+="$filename\0icon\x1f$icon\n"
+  fi
+done
+
+key=$(echo -e "$rofi_lines" | sort | rofi \
+  -dmenu \
+  -no-custom \
+  -p "Select Wallpaper" \
+  -theme ~/.config/rofi/applications.rasi \
+  -grid -i \
+  -theme-str 'element-icon { size: 6em; }' \
+  -theme-str 'listview { columns: 5; lines: 2; }' \
+  -theme-str 'window { width: 80%; }' \
+  -show-icons) # launch-rofi --lines 2 --grid --prompt Wallpaper)
+
+# If user didn't select anything, we are done.
+[ -z "$key" ] && exit
+
+# User selected something in Rofi; grab the path from our mapping
+selected="${PATH_MAPPINGS[$key]}"
+
+# If user didn't select anything, we are done.
+[ -z "$selected" ] && fatal "No mapping found for key '$key'!"
+
+if [ -d "$selected" ]; then
+  # User seected a directory in Rofi; Relaunch with directoru
+  $0 -d $selected
+else
+  # Send selected wallpaper to caller
+  echo "$selected"
+fi
+
+debug "selected: $selected"
+debug "key: $key"
+debug "COUNT of Images: ${#PATH_MAPPINGS[@]}"
+debug "DIRECTORY: $WALLPAPER_DIR"

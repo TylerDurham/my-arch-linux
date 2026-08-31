@@ -1,0 +1,27 @@
+/* UI Colors */
+@define-color accent1             #CBA6F7; /* Mauve — keywords, highlights */
+@define-color accent2             #89B4FA; /* Blue — functions, types */
+@define-color cursor              #F5E0DC; /* Rosewater — cursor */
+@define-color foreground          #CDD6F4; /* Text — primary text */
+@define-color background          #1E1E2E; /* Base — editor background */
+@define-color selection_fg        #CDD6F4; /* Same as foreground */
+@define-color selection_bg        #585B70; /* Surface2 — selection */
+
+/* Text colors */
+@define-color text1               #CDD6F4; /* Text — same as foreground */
+@define-color text2               #A6ADC8; /* Subtext0 — comments, secondary */
+@define-color text3               #6C7086; /* Overlay0 — disabled, placeholders */
+
+/* Surface colors */
+@define-color surface1              #313244; /* Surface0 — sidebars */
+@define-color surface2              #45475A; /* Surface1 — input backgrounds, cards */
+@define-color surface3              #585B70; /* Surface2 — hover states, borders */
+
+/* Named colors */
+@define-color red                 #F38BA8; /* Red — errors, deletions */
+@define-color green               #A6E3A1; /* Green — strings, additions */
+@define-color blue                #89B4FA; /* Blue — constants, links */
+@define-color orange              #FAB387; /* Peach — keywords, warnings */
+@define-color yellow              #F9E2AF; /* Yellow — attributes, tags */
+@define-color purple              #CBA6F7; /* Mauve — builtins, specials */
+@define-color cyan                #94E2D5; /* Teal — functions, types */

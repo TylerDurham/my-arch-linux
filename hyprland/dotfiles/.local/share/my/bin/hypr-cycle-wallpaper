@@ -1,0 +1,130 @@
+#!/usr/bin/env bash
+
+# Libs
+if ! . "$MY_LIB_DIR/bash/require.sh" logger; then
+  echo "Could not load libraries from '$MY_LIB_DIR'!" >&2
+  exit 1
+fi
+
+usage() {
+  source "$0.help"
+  exit 1
+}
+
+# Cycle through the backgrounds shipped with the *active* theme. The theme
+# path is a symlink that hypr-set-current-theme repoints, so this always
+# follows whatever theme is applied right now.
+WALLPAPER_DIR="${MY_CURRENT_THEME_DIR:-$HOME/.config/my/theme}/backgrounds"
+DIRECTION="next"
+NOTIFY=1
+
+while [[ $# -gt 0 ]]; do
+  case $1 in
+  -h | --help) usage ;;
+  -v | --verbose)
+    LOG_LEVEL=8
+    shift
+    ;;
+  -n | --next)
+    DIRECTION="next"
+    shift
+    ;;
+  -p | --previous)
+    DIRECTION="previous"
+    shift
+    ;;
+  -r | --random)
+    DIRECTION="random"
+    shift
+    ;;
+  -d | --directory)
+    WALLPAPER_DIR="$2"
+    shift 2
+    ;;
+  -q | --quiet)
+    NOTIFY=0
+    shift
+    ;;
+  -*)
+    echo "Unknown option: $1" >&2
+    usage
+    ;;
+  *) break ;;
+  esac
+done
+
+[[ -d "$WALLPAPER_DIR" ]] || fatal "Wallpaper directory '$WALLPAPER_DIR' does not exist!"
+
+# Remove trailing slashes
+WALLPAPER_DIR="${WALLPAPER_DIR%/}"
+
+# Trailing slash makes find follow the symlinked theme directory.
+mapfile -t images < <(
+  find "$WALLPAPER_DIR/" -maxdepth 1 -type f \
+    \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.gif" -o -iname "*.svg" \) |
+    sort -V
+)
+
+count=${#images[@]}
+(( count > 0 )) || fatal "No images found in '$WALLPAPER_DIR'!"
+
+debug "DIRECTORY: $WALLPAPER_DIR"
+debug "COUNT of Images: $count"
+
+# Find where the current wallpaper sits in the list. Both sides are resolved
+# with readlink -f because the list comes through the theme symlink while the
+# background link points at the real path underneath it.
+current=$(readlink -f "$HOME/.config/my/background" 2>/dev/null)
+index=-1
+
+for i in "${!images[@]}"; do
+  if [[ "$(readlink -f "${images[$i]}")" == "$current" ]]; then
+    index=$i
+    break
+  fi
+done
+
+debug "CURRENT: ${current:-<none>} (index $index)"
+
+if (( index < 0 )); then
+  # Current wallpaper isn't from this theme (or none is set yet) — enter the
+  # list from whichever end the requested direction implies.
+  case "$DIRECTION" in
+  previous) index=$((count - 1)) ;;
+  random) index=$((RANDOM % count)) ;;
+  *) index=0 ;;
+  esac
+else
+  case "$DIRECTION" in
+  previous) index=$(((index - 1 + count) % count)) ;;
+  random)
+    if (( count > 1 )); then
+      # Never re-pick the wallpaper already showing.
+      index=$(((index + 1 + RANDOM % (count - 1)) % count))
+    fi
+    ;;
+  *) index=$(((index + 1) % count)) ;;
+  esac
+fi
+
+wallpaper="${images[$index]}"
+debug "SELECTED: $wallpaper (index $index)"
+
+# Not fatal on failure: hypr-set-wallpaper updates the background symlink
+# before handing off to awww, and its exit status is awww's. A compositor-side
+# hiccup means the wallpaper is still selected and will apply on the next
+# awww call, so warn rather than abort the notification below.
+hypr-set-wallpaper -i "$wallpaper" || warn "hypr-set-wallpaper reported an error for '$wallpaper'."
+
+if (( NOTIFY )); then
+  # Quiet the helper's own logging so it can't pollute the captured path.
+  thumbnail=$(LOG_LEVEL=0 sys-cache-thumbnail -i "$wallpaper" 2>/dev/null)
+
+  # The synchronous hint replaces the previous popup instead of stacking one
+  # per keypress while cycling.
+  notify-send \
+    -h string:x-canonical-private-synchronous:wallpaper \
+    -i "${thumbnail:-$wallpaper}" \
+    "Wallpaper" \
+    "$(basename "$wallpaper")  ($((index + 1))/$count)"
+fi

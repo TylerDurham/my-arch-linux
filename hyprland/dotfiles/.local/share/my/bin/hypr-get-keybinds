@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+# modmask key keycode description dispatcher arg mouse
+declare -r MODMASK=0
+declare -r KEY=1
+declare -r KEYCODE=2
+declare -r DESCRIPTION=3
+declare -r DISPATCHER=4
+declare -r ARG=5
+declare -r MOUSE=6
+# declare -r LOCKED=0
+# declare -r RELEASE=2
+# declare -r REPEAT=3
+# declare -r LONGPRESS=4
+# declare -r NON_CONSUMING=5
+# declare -r AUTO_CONSUMING=6
+# declare -r HAS_DESCRIPTION=7
+# declare -r SUBMAP=9
+# declare -r SUBMAP_UNIVERSAL=10
+declare -r CATCH_ALL=7
+
+parse_modmask() {
+  case "$1" in
+  0) printf '' ;;
+  1) printf 'SHIFT' ;;
+  4) printf 'CTRL' ;;
+  5) printf 'SHIFT CTRL' ;;
+  8) printf 'ALT' ;;
+  9) printf 'SHIFT ALT' ;;
+  12) printf 'CTRL ALT' ;;
+  13) printf 'SHIFT CTRL ALT' ;;
+  64) printf 'SUPER' ;;
+  65) printf 'SUPER SHIFT' ;;
+  68) printf 'SUPER CTRL' ;;
+  69) printf 'SUPER SHIFT CTRL' ;;
+  72) printf 'SUPER ALT' ;;
+  73) printf 'SUPER SHIFT ALT' ;;
+  76) printf 'SUPER CTRL ALT' ;;
+  77) printf 'SUPER SHIFT CTRL ALT' ;;
+  *) printf '%s' "$1" ;;
+  esac
+}
+
+while IFS=$'\x1f' read -r modmask key keycode description dispatcher arg mouse catch_all; do
+  if [[ "$key" == "mouse:272" ]]; then
+    echo "$(parse_modmask $modmask) Left Drag $description"
+  else
+    echo "$(parse_modmask $modmask) $key: $description"
+  fi
+done < <(hyprctl binds -j |
+  jq -r '.[] | 
+    [
+      .modmask, 
+      (.key // ""), 
+      (.keycode // 0), 
+      (.description // ""), 
+      (.dispatcher // ""), 
+      (.arg // ""),
+      (.mouse // 0),
+      (.catch_all // "")
+      | tostring
+    ] 
+    | join("\u001f")')

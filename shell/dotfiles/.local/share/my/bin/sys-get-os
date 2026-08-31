@@ -1,0 +1,85 @@
+#!/usr/bin/env bash
+
+# ############################################################################
+#
+#  ██████╗ ███████╗████████╗    ██████╗ ███████╗
+# ██╔════╝ ██╔════╝╚══██╔══╝   ██╔═══██╗██╔════╝
+# ██║  ███╗█████╗     ██║█████╗██║   ██║███████╗
+# ██║   ██║██╔══╝     ██║╚════╝██║   ██║╚════██║
+# ╚██████╔╝███████╗   ██║      ╚██████╔╝███████║
+#  ╚═════╝ ╚══════╝   ╚═╝       ╚═════╝ ╚══════╝
+#
+# =============================================================================
+# sys-get-os
+# =============================================================================
+# Detects and prints the current operating system identifier.
+#
+# USAGE:
+#   sys-get-os
+#
+# OUTPUT:
+#   One of: macos | arch | fedora | ubuntu | unknown
+#
+# EXAMPLE:
+#   os=$(sys-get-os)
+#   [[ "$os" == "arch" ]] && echo "Running on Arch Linux"
+# =============================================================================
+
+# detect-os — print a lowercase identifier for the host OS / Linux distro.
+# The emitted token is normalized to match the ICON_* variable suffixes
+# (e.g. "redhat" -> $ICON_REDHAT, "pop_os" -> $ICON_POP_OS).
+
+detect_os() {
+    # 1) OS family via uname (more reliable than $OSTYPE across shells)
+    case "$(uname -s)" in
+        Darwin)  echo "macos";   return 0 ;;
+        FreeBSD) echo "freebsd"; return 0 ;;
+        OpenBSD) echo "openbsd"; return 0 ;;
+        NetBSD)  echo "netbsd";  return 0 ;;
+        Linux)   : ;;                        # continue to distro detection
+        *)       echo "unknown"; return 1 ;;
+    esac
+
+    # 2) Preferred: the freedesktop os-release spec. Its ID field is lowercase
+    #    by definition and covers virtually every modern distro automatically.
+    #    Sourced in a subshell so we don't leak NAME/VERSION/etc. into scope.
+    local id=""
+    if [[ -r /etc/os-release ]]; then
+        id=$(. /etc/os-release 2>/dev/null; printf '%s' "${ID:-}")
+    elif [[ -r /usr/lib/os-release ]]; then
+        id=$(. /usr/lib/os-release 2>/dev/null; printf '%s' "${ID:-}")
+    fi
+    id=$(printf '%s' "$id" | tr '[:upper:]' '[:lower:]')
+
+    # 3) Map the few IDs whose canonical name differs from the icon key.
+    #    Everything else falls through to the passthrough (*) and is emitted
+    #    as-is, already lowercased — so new/unlisted distros just work.
+    case "$id" in
+        rhel|redhat*)              echo "redhat";       return 0 ;;
+        opensuse*|suse|sles|sled)  echo "opensuse";     return 0 ;;
+        linuxmint|mint)            echo "mint";         return 0 ;;
+        pop)                       echo "pop_os";       return 0 ;;
+        raspbian)                  echo "raspberry_pi"; return 0 ;;
+        endeavouros)               echo "endeavour";    return 0 ;;
+        archarm)                   echo "arch";         return 0 ;;
+        ""|linux)                  : ;;   # unusable ID -> legacy probes below
+        *)                         echo "$id";          return 0 ;;
+    esac
+
+    # 4) Legacy fallbacks for systems lacking a usable os-release ID.
+    if   [[ -f /etc/arch-release      ]]; then echo "arch"
+    elif [[ -f /etc/fedora-release    ]]; then echo "fedora"
+    elif [[ -f /etc/centos-release    ]]; then echo "centos"
+    elif [[ -f /etc/gentoo-release    ]]; then echo "gentoo"
+    elif [[ -f /etc/slackware-version ]]; then echo "slackware"
+    elif [[ -f /etc/alpine-release    ]]; then echo "alpine"
+    elif [[ -f /etc/debian_version    ]]; then echo "debian"
+    elif command -v lsb_release >/dev/null 2>&1; then
+        lsb_release -si | tr '[:upper:]' '[:lower:]'
+    else
+        echo "unknown"
+        return 1
+    fi
+}
+
+detect_os

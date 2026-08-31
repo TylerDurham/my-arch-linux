@@ -1,0 +1,96 @@
+!/usr/bin/env bash
+
+# waybar-audio — JSON provider for the waybar "custom/audio" module.
+#
+# Replaces waybar's built-in pulseaudio module so the icon can carry a CSS
+# class reflecting MPRIS playback state: built-in modules only expose their
+# own state (volume, mute, port), and "music is playing" isn't one of them.
+#
+# Emits, on one line:
+#   text     the sink icon (same glyph set the pulseaudio module used)
+#   class    ["playing"|"idle"] plus "muted" when the sink is muted
+#   tooltip  volume, output port, and the current track when one is playing
+#
+# No logger here on purpose: this runs once a second and anything written to
+# stdout would corrupt the JSON waybar is parsing.
+
+set -uo pipefail
+
+# Glyphs are stored as \uXXXX and expanded with printf, the same approach
+# sys-get-os-icon uses: literal Private Use Area characters do not survive
+# every editor and pipeline, and a stripped glyph yields an empty label with
+# no error anywhere.
+ICON_MUTED=$(printf '%b' '\U000f075f')     # md-volume-off, distinct from low volume
+ICON_HEADPHONE=$(printf '%b' '\uf025')     # fa-headphones
+ICON_LOW=$(printf '%b' '\uf026')           # fa-volume-off
+ICON_MED=$(printf '%b' '\uf027')           # fa-volume-down
+ICON_HIGH=$(printf '%b' '\uf028')          # fa-volume-up
+
+# --- sink volume / mute ---------------------------------------------------
+# wpctl prints "Volume: 0.40" and appends " [MUTED]" when muted.
+raw=$(wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null)
+vol=$(awk '{print $2}' <<<"$raw")
+pct=$(awk -v v="${vol:-0}" 'BEGIN { printf "%d", v * 100 + 0.5 }')
+
+muted=0
+[[ "$raw" == *MUTED* ]] && muted=1
+
+# --- active output port (headphones vs speakers) --------------------------
+sink=$(pactl get-default-sink 2>/dev/null)
+port=$(pactl list sinks 2>/dev/null | awk -v s="$sink" '
+  $1 == "Name:"                        { cur = $2 }
+  cur == s && $1 == "Active" && $2 == "Port:" { print $3; exit }
+')
+
+# --- icon -----------------------------------------------------------------
+if ((muted)); then
+  icon="$ICON_MUTED"
+elif [[ "$port" == *headphone* || "$port" == *headset* ]]; then
+  icon="$ICON_HEADPHONE"
+elif ((pct < 34)); then
+  icon="$ICON_LOW"
+elif ((pct < 67)); then
+  icon="$ICON_MED"
+else
+  icon="$ICON_HIGH"
+fi
+
+# --- playback state -------------------------------------------------------
+# -a checks every player, so a paused browser tab can't mask a playing one.
+if playerctl -a status 2>/dev/null | grep -qx "Playing"; then
+  state="playing"
+else
+  state="idle"
+fi
+
+# Emitted as a single string, not an array: waybar tracks only one previous
+# class per custom module, so an array is added but never removed — the stale
+# class sticks and the colour never changes back. Mute is conveyed by the
+# distinct glyph instead of a second class.
+
+# --- tooltip --------------------------------------------------------------
+tooltip="Volume: ${pct}%"
+((muted)) && tooltip="$tooltip (muted)"
+[[ -n "$port" ]] && tooltip="$tooltip"$'\n'"Output: $port"
+
+if [[ "$state" == "playing" ]]; then
+  artist=$(playerctl metadata artist 2>/dev/null)
+  title=$(playerctl metadata title 2>/dev/null)
+  if [[ -n "$artist" && -n "$title" ]]; then
+    tooltip="$tooltip"$'\n\n'"$artist — $title"
+  elif [[ -n "$title" ]]; then
+    tooltip="$tooltip"$'\n\n'"$title"
+  fi
+fi
+
+# --- emit -----------------------------------------------------------------
+# Track metadata is arbitrary text, so escape it rather than trusting it.
+esc() {
+  local s=${1//\\/\\\\}
+  s=${s//\"/\\\"}
+  s=${s//$'\n'/\\n}
+  printf '%s' "$s"
+}
+
+printf '{"text":"%s","tooltip":"%s","class":"%s"}\n' \
+  "$(esc "$icon")" "$(esc "$tooltip")" "$state"

@@ -1,0 +1,27 @@
+/* UI Colors */
+@define-color accent1           #E68E0D; /* Amber — keywords, highlights */
+@define-color accent2           #FFC107; /* Bright amber — functions, types */
+@define-color cursor            #EAEAEA; /* Near white — cursor */
+@define-color foreground        #BEBEBE; /* Light grey — primary text */
+@define-color background        #121212; /* Matte black — editor background */
+@define-color selection_fg      #BEBEBE; /* Same as foreground */
+@define-color selection_bg      #515151; /* Mid grey — selection */
+
+/* Text colors */
+@define-color text1             #BEBEBE; /* Primary text — same as foreground */
+@define-color text2             #8A8A8D; /* Muted text — comments, secondary */
+@define-color text3             #6E6E70; /* Subtle text — disabled, placeholders */
+
+/* Surface colors */
+@define-color surface1          #1D1D1D; /* Slightly lifted surface — sidebars */
+@define-color surface2          #282828; /* Mid surface — input backgrounds, cards */
+@define-color surface3          #333333; /* Raised surface — hover states, borders */
+
+/* Named colors */
+@define-color red               #D35F5F; /* Muted red — errors, deletions */
+@define-color green             #F59E0B; /* Amber — strings, additions (no green in palette) */
+@define-color blue              #8A8A8D; /* Grey — constants, links (no blue in palette) */
+@define-color orange            #E68E0D; /* Amber — keywords, warnings */
+@define-color yellow            #FFC107; /* Bright amber — attributes, tags */
+@define-color purple            #D35F5F; /* Muted red — builtins, specials (no purple in palette) */
+@define-color cyan              #EAEAEA; /* Near white — functions, types (no cyan in palette) */

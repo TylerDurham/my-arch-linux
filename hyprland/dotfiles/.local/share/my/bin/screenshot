@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+mode="${1:-output}"
+
+file="$(xdg-user-dir PICTURES)/screenshots/$(date +%Y-%m-%d_%H-%M-%S).png"
+mkdir -p "$(dirname "$file")"
+
+grimblast copysave "$mode" "$file" && \
+  notify-send "Screenshot saved" "$file" -i "$file"

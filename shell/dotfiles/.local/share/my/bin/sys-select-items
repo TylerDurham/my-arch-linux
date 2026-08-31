@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+#  Pick paths matching a glob, interactively, with fzf.
+#
+#  A thin fzf front end over sys-list-items: the positional args are the same
+#  patterns that script takes, and the chosen path(s) land on stdout, one per
+#  line, so callers can capture them with $(...) or read them in a loop.
+#
+#    -p, --prompt <text>   fzf prompt (default "Select item(s):")
+#    -m, --multiple        allow selecting more than one item
+#    -v, --verbose         raise LOG_LEVEL to 16 for debug tracing
+#
+#  Usage:
+#    module=$(sys-select-items './install.d/*.sh')
+#    sys-select-items -m -p 'Pick modules:' './install.d/*.sh'
+#
+#  Exits non-zero when the picker is cancelled or nothing matches.
+
+set -uo pipefail
+
+# libs
+dependancies=(logger)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
+
+# Called when script exits
+completed() {
+  (( LOG_LEVEL > 8 )) && {
+    echo "" >&2
+    debug_badge "$(basename $0)"
+    debug "MULTIPLE: $MULTIPLE" 2>&1 | indent 2
+    debug "PROMPT: $PROMPT" 2>&1 | indent 2 # >&2
+    debug "SEARCH_PATTERN: $SEARCH_PATTERN" 2>&1 | indent 2 # >&2
+    echo "" >&2
+  }
+}
+
+# Shows help
+usage() {
+  bold "$(basename $0): "
+  sed -n '3,17p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
+}
+
+PROMPT="Select item(s):"
+SEARCH_PATTERN=
+MULTIPLE=
+ARGS=
+
+trap completed EXIT
+
+while [[ "$#" -gt 0 ]]; do 
+  case "$1" in
+    -v|--verbose) export LOG_LEVEL=16; ARGS+="-v"; shift ;;
+    -p|--prompt) PROMPT="$2"; shift 2 ;;
+    -m|--multiple) MULTIPLE="-m"; shift ;;
+    -h|--help) usage; exit 1 ;;
+    *) SEARCH_PATTERN="$1"; shift ;;
+  esac 
+done
+
+fzf $MULTIPLE --prompt "$PROMPT" < <(sys-list-items $ARGS "$SEARCH_PATTERN")
+

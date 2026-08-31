@@ -1,0 +1,18 @@
+help_text=$(cat <<EOF
+$(bold USAGE:) 
+
+  $(basename $0) [-h] [-v] [-o <output>]
+
+$(bold DESCRIPTION:)
+
+  DESCRIPTION_GOES_HERE
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+  -i, --image      Path to image file
+EOF
+)
+
+echo "$help_text"

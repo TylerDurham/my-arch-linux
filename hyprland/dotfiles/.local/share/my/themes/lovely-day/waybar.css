@@ -1,0 +1,27 @@
+/* UI Colors */
+@define-color accent1             #E6B450; /* Orange/gold — keywords, highlights */
+@define-color accent2             #39BAE6; /* Cyan/blue — functions, types */
+@define-color cursor              #E6B450; /* Matches accent1 (gold cursor) */
+@define-color foreground          #BFBDB6; /* Soft white — primary text */
+@define-color background          #0D1017; /* Deep dark — editor background */
+@define-color selection_fg        #BFBDB6; /* Same as foreground */
+@define-color selection_bg        #273747; /* Muted blue-grey selection */
+
+/* Text colors */
+@define-color text1               #BFBDB6; /* Primary text — same as foreground */
+@define-color text2               #8A9099; /* Muted text — comments, secondary */
+@define-color text3               #556070; /* Subtle text — disabled, placeholders */
+
+/* Surface colors */
+@define-color surface1              #131720; /* Slightly lifted surface — sidebars */
+@define-color surface2              #1A2130; /* Mid surface — input backgrounds, cards */
+@define-color surface3              #232E3E; /* Raised surface — hover states, borders */
+
+/* Named colors */
+@define-color red                 #F07178; /* Soft red — errors, deletions */
+@define-color green               #7FD962; /* Bright green — strings, additions */
+@define-color blue                #59C2FF; /* Sky blue — constants, links */
+@define-color orange              #E6B450; /* Gold orange — keywords, warnings */
+@define-color yellow              #E6B673; /* Warm yellow — attributes, tags */
+@define-color purple              #D2A6FF; /* Soft lavender — builtins, specials */
+@define-color cyan                #39BAE6; /* Cyan — functions, types */

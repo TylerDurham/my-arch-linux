@@ -1,0 +1,27 @@
+help_text=$(cat <<EOF
+$(bold USAGE:)
+
+  $(basename $0) [-h] [-v] [-n|-p|-r] [-d <directory>] [-q]
+
+$(bold DESCRIPTION:)
+
+  Cycles to the next, previous, or a random wallpaper in the active theme's
+  backgrounds directory (~/.config/my/theme/backgrounds) and applies it with
+  hypr-set-wallpaper. Wraps around at both ends. Intended for a keybind.
+
+  If the current wallpaper isn't part of the active theme, cycling starts at
+  the first image (or the last, with --previous).
+
+$(bold OPTIONS:)
+
+  -h, --help       Show this help message
+  -v, --verbose    Enable verbose output
+  -n, --next       Advance to the next wallpaper (default)
+  -p, --previous   Go back to the previous wallpaper
+  -r, --random     Jump to a random wallpaper (never the current one)
+  -d, --directory  Cycle this directory instead of the active theme's
+  -q, --quiet      Don't send a desktop notification
+EOF
+)
+
+echo "$help_text"

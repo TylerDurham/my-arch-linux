@@ -1,0 +1,27 @@
+/* UI Colors */
+@define-color accent1           #7FBBB3; /* Blue — keywords, highlights */
+@define-color accent2           #83C092; /* Aqua — functions, types */
+@define-color cursor            #D3C6AA; /* Warm sand — cursor */
+@define-color foreground        #D3C6AA; /* Warm sand — primary text */
+@define-color background        #2D353B; /* Forest bg0 — editor background */
+@define-color selection_fg      #D3C6AA; /* Same as foreground */
+@define-color selection_bg      #4F585E; /* Forest bg4 — selection */
+
+/* Text colors */
+@define-color text1             #D3C6AA; /* Primary text — same as foreground */
+@define-color text2             #9DA9A0; /* Muted text — comments, secondary */
+@define-color text3             #7A8478; /* Subtle text — disabled, placeholders */
+
+/* Surface colors */
+@define-color surface1          #343F44; /* Forest bg1 — sidebars */
+@define-color surface2          #3D484D; /* Forest bg2 — input backgrounds, cards */
+@define-color surface3          #475258; /* Forest bg3 — hover states, borders */
+
+/* Named colors */
+@define-color red               #E67E80; /* Red — errors, deletions */
+@define-color green             #A7C080; /* Green — strings, additions */
+@define-color blue              #7FBBB3; /* Blue — constants, links */
+@define-color orange            #E69875; /* Orange — keywords, warnings */
+@define-color yellow            #DBBC7F; /* Yellow — attributes, tags */
+@define-color purple            #D699B6; /* Purple — builtins, specials */
+@define-color cyan              #83C092; /* Aqua — functions, types */

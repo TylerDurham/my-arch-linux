@@ -1,0 +1,40 @@
+# ##############################################################################
+#
+# ███████╗ ██╗   ██╗ ███████╗ ██████╗  ███████╗  ██████╗  ██████╗  ███████╗ ███████╗ ████████╗
+# ██╔════╝ ██║   ██║ ██╔════╝ ██╔══██╗ ██╔════╝ ██╔═══██╗ ██╔══██╗ ██╔════╝ ██╔════╝ ╚══██╔══╝
+# █████╗   ██║   ██║ █████╗   ██████╔╝ █████╗   ██║   ██║ ██████╔╝ █████╗   ███████╗    ██║   
+# ██╔══╝   ╚██╗ ██╔╝ ██╔══╝   ██╔══██╗ ██╔══╝   ██║   ██║ ██╔══██╗ ██╔══╝   ╚════██║    ██║   
+# ███████╗  ╚████╔╝  ███████╗ ██║  ██║ ██║      ╚██████╔╝ ██║  ██║ ███████╗ ███████║    ██║   
+# ╚══════╝   ╚═══╝   ╚══════╝ ╚═╝  ╚═╝ ╚═╝       ╚═════╝  ╚═╝  ╚═╝ ╚══════╝ ╚══════╝    ╚═╝   
+#
+# ##############################################################################
+
+# UI Colors (based on the Everforest Dark Medium Color Palette)
+
+accent1               = "#7FBBB3"  # Blue — keywords, highlights
+accent2               = "#83C092"  # Aqua — functions, types
+cursor                = "#D3C6AA"  # Warm sand — cursor
+foreground            = "#D3C6AA"  # Warm sand — primary text
+background            = "#2D353B"  # Forest bg0 — editor background
+selection_fg          = "#D3C6AA"  # Same as foreground
+
+selection_bg          = "#4F585E"  # Forest bg4 — selection
+
+# Text colors
+text1                 = "#D3C6AA"  # Primary text — same as foreground
+text2                 = "#9DA9A0"  # Muted text — comments, secondary
+text3                 = "#7A8478"  # Subtle text — disabled, placeholders
+
+# Surface colors
+surface1              = "#343F44"  # Forest bg1 — sidebars
+surface2              = "#3D484D"  # Forest bg2 — input backgrounds, cards
+surface3              = "#475258"  # Forest bg3 — hover states, borders
+
+# Named colors
+red                   = "#E67E80"  # Red — errors, deletions
+green                 = "#A7C080"  # Green — strings, additions
+blue                  = "#7FBBB3"  # Blue — constants, links
+orange                = "#E69875"  # Orange — keywords, warnings
+yellow                = "#DBBC7F"  # Yellow — attributes, tags
+purple                = "#D699B6"  # Purple — builtins, specials
+cyan                  = "#83C092"  # Aqua — functions, types

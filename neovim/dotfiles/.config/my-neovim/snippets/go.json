@@ -1,0 +1,178 @@
+{
+  "Wrap and return error": {
+    "prefix": "iferr",
+    "description": "if err != nil { return fmt.Errorf(\"...: %w\", err) }",
+    "body": [
+      "if err != nil {",
+      "\treturn fmt.Errorf(\"${1:doing the thing}: %w\", err)",
+      "}",
+      "$0"
+    ]
+  },
+  "Sentinel error": {
+    "prefix": "errsent",
+    "description": "Package-level sentinel error for use with errors.Is",
+    "body": [
+      "var Err${1:NotFound} = errors.New(\"${2:not found}\")",
+      "$0"
+    ]
+  },
+  "Context with timeout": {
+    "prefix": "ctxto",
+    "description": "context.WithTimeout plus deferred cancel",
+    "body": [
+      "ctx, cancel := context.WithTimeout(${1:ctx}, ${2:5}*time.Second)",
+      "defer cancel()",
+      "$0"
+    ]
+  },
+  "Deferred close capturing error": {
+    "prefix": "defclose",
+    "description": "defer Close() that reports its error via the named return value (func ... (err error))",
+    "body": [
+      "defer func() {",
+      "\tif cerr := ${1:f}.Close(); cerr != nil && err == nil {",
+      "\t\terr = cerr",
+      "\t}",
+      "}()",
+      "$0"
+    ]
+  },
+  "Table-driven test": {
+    "prefix": "tt",
+    "description": "Table-driven test with subtests and error checking",
+    "body": [
+      "func Test${1:Func}(t *testing.T) {",
+      "\ttests := []struct {",
+      "\t\tname    string",
+      "\t\t${2:in}      ${3:string}",
+      "\t\twant    ${4:string}",
+      "\t\twantErr bool",
+      "\t}{",
+      "\t\t{name: \"${5:base case}\", $2: ${6:\"\"}, want: ${7:\"\"}},",
+      "\t}",
+      "",
+      "\tfor _, tt := range tests {",
+      "\t\tt.Run(tt.name, func(t *testing.T) {",
+      "\t\t\tt.Parallel()",
+      "",
+      "\t\t\tgot, err := $1(tt.$2)",
+      "\t\t\tif (err != nil) != tt.wantErr {",
+      "\t\t\t\tt.Fatalf(\"$1() error = %v, wantErr %v\", err, tt.wantErr)",
+      "\t\t\t}",
+      "\t\t\tif got != tt.want {",
+      "\t\t\t\tt.Errorf(\"$1() = %v, want %v\", got, tt.want)",
+      "\t\t\t}",
+      "\t\t})",
+      "\t}",
+      "}",
+      "$0"
+    ]
+  },
+  "Benchmark": {
+    "prefix": "bench",
+    "description": "Benchmark using b.Loop() (Go 1.24+)",
+    "body": [
+      "func Benchmark${1:Func}(b *testing.B) {",
+      "\t${2:// setup goes here, before the loop}",
+      "\tfor b.Loop() {",
+      "\t\t$0",
+      "\t}",
+      "}"
+    ]
+  },
+  "Main with signal-aware context": {
+    "prefix": "mainctx",
+    "description": "package main with signal.NotifyContext and a run(ctx) error function",
+    "body": [
+      "package ${1:main}",
+      "",
+      "import (",
+      "\t\"context\"",
+      "\t\"errors\"",
+      "\t\"fmt\"",
+      "\t\"os\"",
+      "\t\"os/signal\"",
+      "\t\"syscall\"",
+      ")",
+      "",
+      "func main() {",
+      "\tctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)",
+      "\tdefer stop()",
+      "",
+      "\tif err := run(ctx); err != nil && !errors.Is(err, context.Canceled) {",
+      "\t\tfmt.Fprintf(os.Stderr, \"error: %v\\n\", err)",
+      "\t\tos.Exit(1)",
+      "\t}",
+      "}",
+      "",
+      "func run(ctx context.Context) error {",
+      "\t$0",
+      "\treturn nil",
+      "}"
+    ]
+  },
+  "HTTP server with graceful shutdown": {
+    "prefix": "httpsrv",
+    "description": "http.Server started in a goroutine and shut down gracefully when ctx is cancelled",
+    "body": [
+      "mux := http.NewServeMux()",
+      "mux.HandleFunc(\"GET /${1:healthz}\", func(w http.ResponseWriter, r *http.Request) {",
+      "\t$0",
+      "})",
+      "",
+      "srv := &http.Server{",
+      "\tAddr:              ${2:addr},",
+      "\tHandler:           mux,",
+      "\tReadHeaderTimeout: 5 * time.Second,",
+      "}",
+      "",
+      "errCh := make(chan error, 1)",
+      "go func() {",
+      "\tif err := srv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {",
+      "\t\terrCh <- err",
+      "\t}",
+      "\tclose(errCh)",
+      "}()",
+      "",
+      "select {",
+      "case err := <-errCh:",
+      "\treturn err",
+      "case <-ctx.Done():",
+      "\tshutdownCtx, cancel := context.WithTimeout(context.Background(), ${3:10}*time.Second)",
+      "\tdefer cancel()",
+      "\treturn srv.Shutdown(shutdownCtx)",
+      "}"
+    ]
+  },
+  "Worker pool": {
+    "prefix": "workers",
+    "description": "Fixed pool of goroutines consuming a channel, with WaitGroup",
+    "body": [
+      "jobs := make(chan ${1:Job})",
+      "results := make(chan ${2:Result}, ${3:cap(jobs)})",
+      "",
+      "var wg sync.WaitGroup",
+      "for range ${4:runtime.NumCPU()} {",
+      "\twg.Add(1)",
+      "\tgo func() {",
+      "\t\tdefer wg.Done()",
+      "\t\tfor job := range jobs {",
+      "\t\t\tselect {",
+      "\t\t\tcase results <- ${5:process}(job):",
+      "\t\t\tcase <-ctx.Done():",
+      "\t\t\t\treturn",
+      "\t\t\t}",
+      "\t\t}",
+      "\t}()",
+      "}",
+      "",
+      "go func() {",
+      "\twg.Wait()",
+      "\tclose(results)",
+      "}()",
+      "",
+      "$0"
+    ]
+  }
+}

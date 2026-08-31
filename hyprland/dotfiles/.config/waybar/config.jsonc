@@ -1,0 +1,154 @@
+{
+  // Matches what the modules actually require: the 10px top margin on
+  // .modules-* plus #bluetooth's 10px vertical margin and the 14px text.
+  // Setting this lower does nothing — waybar clamps up and warns.
+  "height": 50,
+  "layer": "top",
+  "modules-left": [
+    "custom/launcher",
+    "hyprland/workspaces",
+    "hyprland/submap",
+    "clock"
+  ],
+  "modules-center": [
+    "hyprland/window",
+    "tray"
+  ],
+  "modules-right": [
+    "battery",
+    "custom/audio",
+    "idle_inhibitor",
+    "bluetooth",
+    "network",
+    "power-profiles-daemon"
+  ],
+  "custom/launcher": {
+    "exec": "~/.local/share/my/bin/sys-get-os-icon",
+    "format": "{}",
+    "on-click": "rofi-launch-module ~/.config/rofi/modules/system.json"
+  },
+  "hyprland/window": {
+    "max-length": 50
+  },
+  "clock": {
+    "format": "{:L%A %I:%M %p}",
+    "format-alt": "{:L%A %I:%M %p}"
+  },
+  "idle_inhibitor": {
+      "format": "{icon}",
+      "format-icons": {
+        "activated": "",
+        "deactivated": ""
+      },
+      "timeout": 60.0,
+      "start-activated": false,
+      "tooltip": true,
+      "tooltip-format-activated": "Idle inhibitor: ON\nScreen will not lock or sleep",
+      "tooltip-format-deactivated": "Idle inhibitor: OFF\nNormal idle behavior active"
+  },
+  "bluetooth": {
+    "format": "",
+    "format-disabled": "", // an empty format will hide the module
+    "format-connected": "",
+    "tooltip-format": "Connections: {num_connections}\n\n{controller_alias}\t{controller_address}",
+    "tooltip-format-connected": "Connections: {num_connections}\n\n{controller_alias}\t{controller_address}\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}\t{device_address}",
+    "on-click": "blueman-manager"
+  },
+  "battery": {
+    "interval": 60,
+    // For the battery module a state activates when capacity is <= its value
+    // (every other module uses >=), and waybar picks the lowest match. So:
+    // 0-9 critical, 10-79 warning, 80-100 good. Colors live in style.css.
+    "states": {
+      "critical": 9,
+      "warning": 79,
+      "good": 100
+    },
+    "format": "{capacity}% {icon}",
+    "tooltip-format": "Capacity: {capacity}\nPower (watts): {power}\nTime to charge: {time}",
+    "format-icons": {
+      "default": [
+        "󰂎",
+        "󰁺",
+        "󰁻",
+        "󰁼",
+        "󰁽",
+        "󰁾",
+        "󰁿",
+        "󰂀",
+        "󰂁",
+        "󰂂",
+        "󰁹"
+      ],
+      "charging": [
+        "󰢟",
+        "󰢜",
+        "󰂆",
+        "󰂇",
+        "󰂈",
+        "󰢝",
+        "󰂉",
+        "󰢞",
+        "󰂊",
+        "󰂋",
+        "󰂅"
+      ]
+    }
+  },
+  "network": {
+    "format": "",
+    "format-wifi": "",
+    "format-ethernet": "",
+    "format-disconnected": "󰤭", //An empty format will hide the module.
+    "tooltip-format": "{ifname} via {gwaddr} 󰊗",
+    "tooltip-format-wifi": "{essid} ({signalStrength}%) ",
+    "tooltip-format-ethernet": "{ifname} ",
+    "tooltip-format-disconnected": "󰖪",
+    "max-length": 50,
+    "on-click": "hypr-launch-tui nmtui"
+  },
+  "power-profiles-daemon": {
+    "format": "{icon}",
+    "tooltip-format": "Power profile: {profile}\nDriver: {driver}",
+    "tooltip": true,
+    "format-icons": {
+      "default": "",
+      "performance": "",
+      "balanced": "",
+      "power-saver": ""
+    }
+  },
+
+  // Replaces the built-in pulseaudio module. That module cannot express
+  // "music is playing" — playback is MPRIS state, not sink state — and a
+  // built-in module's CSS classes cannot be driven from outside. The script
+  // reports the same icon set plus a playing/idle/muted class.
+  // exec-on-event (default) re-runs it on scroll, so volume feels instant.
+  "custom/audio": {
+    "exec": "~/.config/waybar/scripts/waybar-audio",
+    "return-type": "json",
+    "interval": 1,
+    "on-scroll-up": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+ -l 1.0",
+    "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-",
+    "on-click": "pavucontrol",
+    "on-click-right": "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"
+  },
+
+  "hyprland/workspaces": {
+    "format": "{icon}",
+    "on-click": "activate",
+    "sort-by-number": true,
+    "format-icons": {
+      "9": "",
+      "10": "󰒃"
+    },
+    "persistent-workspaces": {
+      "*": 5 // 5 workspaces by default on every monitor
+    }
+  },
+
+  "tray": {
+    "spacing": 20
+  }
+}

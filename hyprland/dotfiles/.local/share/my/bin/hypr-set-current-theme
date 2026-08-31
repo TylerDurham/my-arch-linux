@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+
+source "$MY_LIB_DIR/bash/require.sh" logger || {
+  echo "ERROR: could not load require.sh logger!"
+  exit 1
+}
+
+# MY_THEME_DIR is exported by the shell hook, which isn't loaded when this is
+# run from a Hyprland exec or a bare shell, so fall back to the install path.
+THEMES_DIR="${MY_THEME_DIR:-$HOME/.local/share/my/themes}"
+
+# Figure out the theme from the name, or ask for one interactively.
+if [[ -n "$1" ]]; then
+  THEME_NAME="$1"
+else
+  # Nothing to pick with if there's no terminal — don't hang a startup script.
+  if [[ ! -t 0 || ! -t 1 ]]; then
+    fatal "No theme specified. Usage: $(basename "$0") <theme-name>"
+  fi
+
+  command -v fzf >/dev/null || fatal "fzf is not installed; pass a theme name instead."
+
+  CURRENT=$(basename "$(readlink "$MY_CURRENT_THEME_DIR" 2>/dev/null)" 2>/dev/null)
+
+  # Trailing slash so find descends into the symlinked themes directory.
+  THEME_NAME=$(
+    find "$THEMES_DIR/" -maxdepth 1 -mindepth 1 -type d -printf '%f\n' | sort |
+      fzf --prompt="Theme> " \
+        --header="Current: ${CURRENT:-none}" \
+        --height=40% --reverse --no-multi \
+        --preview="cat '$THEMES_DIR'/{}/@palette.toml 2>/dev/null || cat '$THEMES_DIR'/{}/colors.toml 2>/dev/null || echo '(no palette file)'" \
+        --preview-window=right:60%
+  )
+
+  # User pressed Esc / Ctrl-C — nothing to do.
+  [[ -z "$THEME_NAME" ]] && exit 0
+fi
+
+THEME_PATH="$THEMES_DIR/$THEME_NAME"
+
+[[ ! -d "$THEME_PATH" ]] && fatal "Could not load theme '$THEME_NAME' from '$THEME_PATH'!"
+
+debug "MY_THEME_DIR: $THEMES_DIR"
+debug "MY_CURRENT_THEME: $MY_CURRENT_THEME_DIR"
+
+# If we find a file called "default", use it. Otherwise, use the first one we find
+BACKGROUND=$(ls -r $THEME_PATH/backgrounds/default.jpg)
+if [[ $? > 0 ]]; then 
+  mapfile -t images < <(ls -t $THEME_PATH/backgrounds/*.{png,svg,jpg,gif})
+  [[ -e "${images[0]}" ]] && BACKGROUND="${images[0]}"
+fi
+
+hypr-set-wallpaper -i $BACKGROUND
+
+# Blow away current symlink and replace with new one
+rm "$MY_CURRENT_THEME_DIR"
+ln -s $THEME_PATH $MY_CURRENT_THEME_DIR
+
+# Restart all the things
+hypr-restart-theme
