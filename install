@@ -1,215 +1,73 @@
 #!/usr/bin/env bash
-#
-# install.sh - run the installer modules in install.d/
-#
-# USAGE:
-#   ./install.sh -s|--select          pick modules interactively with fzf
-#   ./install.sh -l|--list            list the available modules
-#   ./install.sh -x|--extra           list, select, install, or uninstall the  extra modules
-#   ./install.sh -i|--install         install module(s)
-#   ./install.sh -u|--uninstall       uninstall module(s)
-#   ./install.sh -h|--help            show this help
-#
-# Each module in 'install.d/' or 'install.d/extra/' is a standalone script 
-# setting up one piece of the system, so they can be run one at a time or 
-# as a full pass. 
-#
-# Note: Set DEBUG=1 in the environment for verbose logging.
 
 set -euo pipefail
 
-# EXIT CODES
-readonly EX_NOINPUT=66
+declare -r REPO_ROOT="$(git rev-parse --show-toplevel)"
+
+#source "$REPO_ROOT/install.d/lib/envs.sh"
+source "$MY_LIB_DIR/bash/installer.sh"
+
+# Fires when the script exits. Prints debug info.
+completed() {
+
+  (( LOG_LEVEL >= 8 )) && {
+    echo 
+    debug_badge "$(basename $0)"
+    debug "OPTIONS: $(printf '%d = 0x%x = ' "$OPTIONS" "$OPTIONS")$(to_binary $OPTIONS)"
+    debug "OPT_EXTRA: $(( OPTIONS & OPT_EXTRA ))"
+    debug "OPT_INSTALL: $(( OPTIONS & OPT_INSTALL ))"
+    debug "OPT_SELECT: $(( OPTIONS & OPT_SELECT ))"
+    debug "OPT_UNINSTALL: $(( OPTIONS & OPT_UNINSTALL ))"
+    debug "SEARCH_PATH: $SEARCH_PATH"
+    debug "MODULES: "
+    for module in "${MODULES[@]}"; do echo "$module" | indent; done;
+
+    echo 
+    debug_badge "ENV"
+    debug "LOG_LEVEL: $LOG_LEVEL"
+    debug "MY_LIB_DIR: $MY_LIB_DIR"
+    debug "REPO_ROOT: $REPO_ROOT"
+  }
+}
 
 # GLOBALS
-readonly MODULE_DIR="install.d"
-readonly MODULE_DIR_PATH="$(realpath $(dirname $0))/$MODULE_DIR"
-EXTRA=0
-SELECT=0
-SPECIFIC=0
-ACTION=HELP
-MODULES=()
-UNINSTALL=0
+SEARCH_PATH=
 
-# --- logging ------------------------------------------------------------
-if [[ -t 2 ]]; then
-  LOG_RESET=$'\033[0m'
-  LOG_BLUE=$'\033[34m'
-  LOG_GREEN=$'\033[32m'
-  LOG_PURPLE=$'\033[35m'
-  LOG_RED=$'\033[31m'
-  LOG_YELLOW=$'\033[33m'
-else
-  LOG_RESET='' LOG_BLUE='' LOG_GREEN='' LOG_PURPLE='' LOG_RED='' LOG_YELLOW=''
-fi
-
-_log() { printf '%s%s%s %s\n' "$2" "$1" "$LOG_RESET" "${*:3}" >&2; }
-
-debug() { [[ -n "${DEBUG:-}" ]] || return 0; _log [DEBUG] "$LOG_PURPLE" "$@"; }
-error() { _log [ERROR] "$LOG_RED"    "$@"; }
-die()   { echo ""; _log [FATAL] "$LOG_RED" "$@"; exit 1; }
-info()  { _log [INFO]  "$LOG_BLUE"   "$@"; }
-module() { _log "  󰕳" "$LOG_PURPLE" "$@"; }
-success() { _log  "$LOG_GREEN" "$@"; }
-warn()  { _log [WARN]  "$LOG_YELLOW" "$@"; }
-indent() { sed "s/^/$(printf '%*s' "${1:-4}" '')/" >&2; }
-# -------------------------------------------------------------------------
-
-usage() {
-  sed -n '3,18p' "${BASH_SOURCE[0]}" | sed 's/^# \?//'
-
-  echo ""
-  echo "MODULES:"
-  list_modules 1
-  EXTRA=1
-  echo ""
-  list_modules 1
-  exit 1
-}
-
-get_module_dir() {
-  local extra=
-
-  if [[ $EXTRA == 1 ]]; then 
-    extra="extra"
-  fi
-
-  echo "$MODULE_DIR_PATH/$extra/*.sh"
-}
-
-list_modules() {
-  local pretty=${1:-0}
-  local module_path_dir="$(get_module_dir)"
-
-  if [[ $pretty == 1 ]]; then
-    if [[ $EXTRA == 1 ]]; then 
-      module "The following  extra modules are available for install:"
-    else
-      module "The following modules are available for install:"
-    fi
-  fi
-  
-  for module in $module_path_dir; do 
-    if [[ $pretty == 1 ]]; then
-      echo "    - $(basename $module)"
-    else
-      printf '%s\n' "$module"
-    fi
-  done
-}
-
-process_module() {
-  local module_path="$1"
-  local action="install"
-  local status=0
-
-  if [[ $ACTION == "UNINSTALL" ]]; then
-    action="uninstall"
-  fi
-
-  if [[ ! -f "$module_path" ]]; then
-    warn "Module '$module_path' could not be found."
-    return
-  fi
-
-  module "${action^}ing module '$module_path'..."
-
-  # Each module is sourced in a subshell so its globals (readonly CWD and
-  # friends) and hook definitions cannot collide with the runner or leak into
-  # the module processed next.
-  (
-    local hook
-
-    source "$module_path"
-
-    for hook in on_init "on_${action}"; do
-      declare -F "$hook" >/dev/null \
-        || { error "Module '$module_path' does not define ${hook}()."; exit "$EX_NOINPUT"; }
-    done
-
-    on_init
-    "on_${action}"
-  ) || status=$?
-
-  if [[ $status -ne 0 ]]; then
-    die "Module '$module_path' failed with exit code ${status}."
-  fi
-}
-
-process_modules() {
-  local modules=("$@")
-
-  debug "Count of modules to '$ACTION': ${#MODULES[@]}"
-  for module in "${modules[@]}"; do 
-    process_module "$module"
-  done
-}
+trap completed EXIT
 
 while [[ "$#" -gt 0 ]]; do 
   case "$1" in 
-    -h|--help) ACTION=HELP; shift ;;
-    -i|--install) ACTION=INSTALL; shift ;;
-    -l|--list) ACTION=LIST; shift ;; # list_modules 1; exit ;;
-    -s|--select) SELECT=1; shift ;;
-      # mapfile -t MODULES < <(list_modules | fzf -m --prompt "Select multiple modules by hitting <TAB>:"); 
-      # break ;;
-    -x|--extra) EXTRA=1; shift ;;
-    # -m|--module) 
-    #   shift
-    #     while [[ $# -gt 0 && "$1" != -* ]]; do
-    #         # [[ "$1" == *.sh ]] || 1+=".sh"
-    #         MODULES+=("$MODULE_DIR_PATH/${1%.sh}.sh")
-    #         shift
-    #     done
-    #   ;;
-    # -u|--uninstall) ACTION=UNINSTALL; shift ;;
+    -h|--help) ACTION="HELP"; shift; ;;
+    -i|--install) OPTIONS=$(( OPTIONS | OPT_INSTALL )); shift; ;;
+    -u|--uninstall) OPTIONS=$(( OPTIONS | OPT_UNINSTALL )); shift ;;
+    -s|--select) OPTIONS=$(( OPTIONS | OPT_SELECT )); shift ;;
+    -x|--extra) OPTIONS=$(( OPTIONS | OPT_EXTRA )); shift ;;
+    -v|--verbose) OPTIONS=$(( OPTIONS | OPT_VERBOSE )); shift ;;
     *) break ;;
   esac
 done
 
-clear
+# LOG_LEVEL
+(( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { LOG_LEVEL=16; }
 
+# Sanity check
+source "./install.d/lib/prerequisites.sh"
 
-
-if [[ $SELECT == 1 ]]; then 
-  if [[ $ACTION != UNINSTALL || $ACTION != INSTALL ]]; then
-    error "Please specify either -i|--install or -u|--uninstall!"
-    echo ""
-    usage
-    exit 1
-  fi
-  mapfile -t MODULES < <(list_modules | fzf -m --prompt "Select multiple modules by hitting <TAB>:"); 
+# Set search path 
+if (( (OPTIONS & OPT_EXTRA) == OPT_EXTRA )); then
+  SEARCH_PATH=./install.d/extra/*.sh
+  debug "Using extra search path '$SEARCH_PATH'."
 else
-  mapfile -t MODULES < <(list_modules 0)
+  SEARCH_PATH="./install.d/*.sh"
+  debug "Using default search path '$SEARCH_PATH'."
 fi
 
-debug "Count of modules to process: ${#MODULES[@]}"
-debug "List of modules to process: "
-debug $(printf ' - %s\n' "${MODULES[@]}")
-debug "EXTRA: $EXTRA"
-debug "SELECT: $SELECT"
-debug "ACTION: $ACTION"
-
-case "$ACTION" in 
-  LIST) list_modules 1; exit 0 ;;
-  UNINSTALL) process_modules "${MODULES[@]}" ;;
-  INSTALL) process_modules "${MODULES[@]}" ;;
-  *) usage; exit 1 ;;
-esac
-
-# exit
-#
-# if [[ "${#MODULES[@]}" -gt 0 ]]; then
-#   info "${#MODULES[@]} modules passed as args. Processing ${#MODULES[@]} modules..."
-#   process_modules "${MODULES[@]}"
-# else
-#   info "No modules passed as args. Processing all modules..."
-#   mapfile -t MODULES < <(list_modules 0)
-#   process_modules "${MODULES[@]}"
-# fi
-
-success "Done!"
-
-if [[ ! $EXTRA == 1 ]]; then 
-  info "Be sure to install any  extra modules you might need!"
+# Gather modules
+if (( (OPTIONS & OPT_SELECT) == OPT_SELECT )); then
+  mapfile -t MODULES < <(sys-select-items -m "$SEARCH_PATH")
+else
+  mapfile -t MODULES < <(sys-list-items "$SEARCH_PATH")
 fi
+
+process_modules $OPTIONS "${MODULES[@]}"
+

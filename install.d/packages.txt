@@ -1,10 +1,12 @@
 
 awww	                  # extra	wayland	swww	Wayland wallpaper daemon with transitions [upstream renamed swww to awww]
 bat                     # cat clone with syntax highlighting and git integration
+bc                      # command line calculator
 bash-completion         # programmable tab-completion for the bash shell
 brightnessctl           # lightweight CLI for reading/setting display & LED brightness
 btop                    # resource monitor (CPU, memory, disks, network, processes)
 flatpak                 # sandboxed application runtime and distribution framework
+figlet
 fzf                     # command-line fuzzy finder, used for interactive filtering
 grim                    # screenshot capture utility for Wayland compositors
 hypridle                # Hyprland idle daemon (dims, locks, or suspends on timeout)
@@ -36,6 +38,7 @@ waybar                  # highly customizable status bar for Wayland compositors
 which                   # shows the full path of a command found on $PATH
 wl-clipboard            # wl-copy / wl-paste clipboard utilities for Wayland
 xdg-user-dirs           # creates and manages ~/Desktop, ~/Downloads, ~/Music, etc.
+zoxide                  # shell CD fuzzy finder
 zip                     # create and modify .zip archives
 zsh                     # Z shell - the login/interactive shell for this setup
 
