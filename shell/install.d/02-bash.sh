@@ -21,7 +21,7 @@ on_install() {
   fi
 
   echo "Overwriting '$TARGET'..." 2>&1 | indent
-  echo "source ~/.local/share/$PREFIX/shell/bash.rc.sh" > "$TARGET"
+  echo "source ~/.local/share/my/shell/bash.rc.sh" > "$TARGET"
 }
 
 on_uninstall() {

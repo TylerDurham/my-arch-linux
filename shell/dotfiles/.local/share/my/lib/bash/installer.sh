@@ -8,18 +8,99 @@ declare -g -r OPT_EXTRA=2
 declare -g -r OPT_INSTALL=4
 declare -g -r OPT_UNINSTALL=8
 declare -g -r OPT_VERBOSE=16
+declare -g -r OPT_PACKAGE=32
+declare -g -r OPT_DRYRUN=64
 
+# package_badge <install|remove> <package...>
+# Prints a colored badge with an install/remove icon followed by the package list.
+# Globals: none
+# Arguments:
+#   $1 - action ("install" or anything else, treated as "remove")
+#   $@ (after shift) - package name(s) to display
+# Outputs:
+#   Writes formatted badge line to stdout via fmt_badge
+# Returns:
+#   0
+package_badge() {
+  local action="$1"; local name="$2"; shift;
+  local icon
+  if [[ "$action" == "install" ]]; then
+      icon="󱧕"
+  else
+      icon=="󱧙"
+  fi
+
+  shift; fmt_badge GREEN "$icon PKG ${name^^}"; echo "$*"
+}
+
+# module_badge <install|remove> <package...>
+# Prints a colored badge with an install/remove icon followed by the package list.
+# Globals: none
+# Arguments:
+#   $1 - action ("install" or anything else, treated as "remove")
+#   $@ (after shift) - package name(s) to display
+# Outputs:
+#   Writes formatted badge line to stdout via fmt_badge
+# Returns:
+#   0
+module_badge() {
+  local action="$1"; local name="$2"; shift;
+  local icon
+  if [[ "$action" == "install" ]]; then
+      icon=""
+  else
+      icon=="󰉘"
+  fi
+
+  shift; fmt_badge BLUE "$icon MOD ${name^^}"; echo "$*"
+}
+
+# Converts the set bits to their string equivalents.
+get_options_str() {
+  options=$1
+  for bit in \
+    OPT_SELECT \
+    OPT_EXTRA \
+    OPT_INSTALL \
+    OPT_UNINSTALL \
+    OPT_VERBOSE \
+    OPT_PACKAGE \
+    OPT_DRYRUN \
+    ;
+  do
+    val=${!bit}
+    if (( options & val )); then
+      echo $(green "$bit")
+    else
+      echo $(dim "$bit")
+    fi
+  done
+}
+
+validate_options() {
+  opts=$1
+
+  # LOG_LEVEL
+  (( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { LOG_LEVEL=16; }
+  # (( (opts & OPT_SELECT) && !(opts & OPT_PACKAGE) )) && fatal 1 "Cannot use option $(yellow '-s|--select') without $(yellow '-p|--package!')"
+  (( opts &  OPT_INSTALL )) && (( opts & OPT_UNINSTALL )) && fatal 1 "Cannot combine options $(yellow '-i|--install') and $(yellow '-u|--uninstall')!"
+  (( opts & (OPT_INSTALL | OPT_UNINSTALL) )) || fatal 1 "Must specify at least $(yellow '-i|--install') or $(yellow '-u|--uninstall')!"
+}
+
+# Reads the install/uninstall bit from the bitmask
 get_action() {
-  local flags=$1
-  if (( (flags & OPT_INSTALL) == OPT_INSTALL)); then
+  local options=$1
+
+  if (( (options & OPT_INSTALL) == OPT_INSTALL)); then
     echo -n "install"
-  elif (( (flags & OPT_UNINSTALL) == OPT_UNINSTALL)); then
+  elif (( (options & OPT_UNINSTALL) == OPT_UNINSTALL)); then
     echo -n "uninstall"
   else
     echo -n ""
   fi
 }
 
+# Converts the set bits to their binary equivalents
 to_binary() {
     local -i n=$1 width=${2:-8}
     local bits=""
@@ -29,9 +110,45 @@ to_binary() {
     printf '%s\n' "$bits"
 }
 
+process_package() {
+  local root="$(pwd)"
+  local options="$1"
+  local package="$2"
+  local action="$(get_action $options)"
+  local search_path="$root/$package/install.d/*.sh"
+  local modules=()
+
+  [[ "$package" == "" ]] && fatal 1 "no package specified."
+  [[ -d "$root" ]] || fatal 2 "Package directory '$search_path' not found!"
+  [[ "$action" == "" ]] && {
+    fatal 1 "no action specified."
+  }
+
+  package_badge $action "${action}ing package '$package'..."
+
+  # Gather modules
+  if (( (OPTIONS & OPT_SELECT) == OPT_SELECT )); then
+    mapfile -t modules < <(sys-select-items -m "$search_path")
+  else
+    mapfile -t modules < <(sys-list-items "$search_path")
+  fi
+
+  process_modules $options "${modules[@]}"
+}
+
+process_packages() {
+  local options=$1
+  local packages="$2"
+
+  for package in "${packages[@]}"; do 
+    process_package $options "$package"
+  done
+}
+
 process_module() {
-  local action="$1"
-  local module_path="${*:2}"
+  local options=$1
+  local module_path="$2"
+  local action=$(get_action $options)
   local status=0
 
   [[ "$action" == "" ]] && {
@@ -43,7 +160,7 @@ process_module() {
     return
   fi
 
-  info_badge "${action^}ing module '$module_path'..." | indent 2
+  module_badge "$action" "$(basename $module_path)" | indent 2
 
   # Each module is sourced in a subshell so its globals (readonly CWD and
   # friends) and hook definitions cannot collide with the runner or leak into
@@ -53,13 +170,22 @@ process_module() {
 
     source "$module_path"
 
-    for hook in on_init "on_${action}"; do
-      declare -F "$hook" >/dev/null \
-        || { error "Module '$module_path' does not define ${hook}()."; exit "$EX_NOINPUT"; }
-    done
+    # Call 'on_init' hook if it exists
+    if declare -F "on_init" >/dev/null; then
+      on_init
+    fi
 
-    on_init
-    "on_${action}"
+    # 'on_install' 'on_uninstall' hooks MUST exist
+    hook="on_${action}"
+    declare -F "$hook" >/dev/null \
+      && "$hook" \
+      || { error "Module '$module_path' does not define ${hook}()."; exit "$EX_NOINPUT"; }
+
+    # Call 'on_completed' hook if it exists
+    if declare -F "on_completed" >/dev/null; then
+        on_completed
+    fi
+
   ) || status=$?
 
   if [[ $status -ne 0 ]]; then
@@ -68,21 +194,17 @@ process_module() {
 }
 
 process_modules() {
-  local action=$(get_action $1)
+  local options=$1
+  local action=$(get_action $options)
   shift
   local modules=("$@")
-
-  # echo "$action"
-  # echo "${modules[@]}"
-  # exit
 
   [[ "$action" == "" ]] && {
     fatal 1 "No action specified."
   }
 
-  info_badge "Count of modules to '$action': ${#modules[@]}"
   for module in "${modules[@]}"; do 
-    process_module "$action" "$module"
+    process_module $options "$module"
   done
 }
 

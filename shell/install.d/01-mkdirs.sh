@@ -15,7 +15,7 @@ on_init() {
 
 on_install() {
   for dir in "${DIRECTORIES[@]}"; do
-    info "Creating directory at '$dir'..." 2>&1 | indent 
+    echo "Creating directory at '$dir'..." 2>&1 | indent 
     mkdir -p "$dir"
   done
 }
@@ -27,3 +27,6 @@ on_uninstall() {
   done
 }
 
+on_completed() {
+  echo "$(basename $module) completed!" 2>&1 | indent
+}
