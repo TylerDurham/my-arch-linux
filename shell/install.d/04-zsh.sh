@@ -4,7 +4,7 @@ TARGET="$HOME/.zshrc"
 BACKUP="$TARGET.backup"
 
 on_init() {
-  echo "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..." 2>&1 | indent
 
   # Modules are sourced in their own subshell, so exiting here skips the
   # install/uninstall hook without failing the run.
@@ -20,8 +20,8 @@ on_install() {
     mv "$TARGET" "$BACKUP"
   fi
 
-  echo "Overwriting '$TARGET'..." 2>&1 | indent
-  echo "source ~/.local/share/$PREFIX/shell/zsh.rc.sh" > "$TARGET"
+  log "Overwriting '$TARGET'..." 2>&1 | indent
+  log "source ~/.local/share/$PREFIX/shell/zsh.rc.sh" > "$TARGET"
 }
 
 on_uninstall() {

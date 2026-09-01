@@ -172,3 +172,7 @@ process_modules() {
   done
 }
 
+log() {
+    printf -- '- %s\n' "$*" 2>&1 | indent
+}
+

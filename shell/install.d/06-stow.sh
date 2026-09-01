@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-SOURCE="$REPO_ROOT/shell/dotfiles"
+SOURCE="$(git rev-parse --show-toplevel)/shell/dotfiles"
 TARGET="$HOME/"
 
 on_init() {
