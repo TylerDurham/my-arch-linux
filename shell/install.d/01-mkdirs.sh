@@ -10,12 +10,12 @@ DIRECTORIES=(
 )
 
 on_init() {
-  log "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..."
 }
 
 on_install() {
   for dir in "${DIRECTORIES[@]}"; do
-    log "Creating directory at '$dir'..." 2>&1 | indent 
+    log "Creating directory at '$dir'..."
     mkdir -p "$dir"
   done
 }
@@ -28,5 +28,5 @@ on_uninstall() {
 }
 
 on_completed() {
-  log "$(basename $module) completed!" 2>&1 | indent
+  log "$(basename $module) completed!"
 }

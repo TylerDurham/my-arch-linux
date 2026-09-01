@@ -4,11 +4,11 @@ SOURCE="$(git rev-parse --show-toplevel)/shell/dotfiles"
 TARGET="$HOME/"
 
 on_init() {
-  echo "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..."
 }
 
 on_install() {
-  echo "Stowing '$SOURCE' to '$TARGET'..." 2>&1 | indent
+  log "Stowing '$SOURCE' to '$TARGET'..."
   stow --dir "$SOURCE" -S . -t "$TARGET"
 }
 

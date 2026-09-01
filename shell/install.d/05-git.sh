@@ -25,7 +25,7 @@ GIT_CONFIGS=(
 )
 
 on_init() {
-  log "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..."
 
   # Modules are sourced in their own subshell, so exiting here skips the
   # install/uninstall hook without failing the run.
@@ -41,7 +41,7 @@ on_install() {
   for entry in "${GIT_CONFIGS[@]}"; do
     key="${entry%%:*}"
     value="${entry#*:}"
-    log "Setting '$key' = '$value'..." 2>&1 | indent
+    log "Setting '$key' = '$value'..."
     git config --global "$key" "$value"
   done
 }

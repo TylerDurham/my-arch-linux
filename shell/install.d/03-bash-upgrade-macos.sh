@@ -8,7 +8,7 @@
 # to pick up the modern version without changing anyone's login shell.
 
 on_init() {
-  log "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..."
 
   # Modules are sourced in their own subshell, so exiting here skips the
   # install/uninstall hook without failing the run.
@@ -26,16 +26,16 @@ on_init() {
 
 on_install() {
   if brew list bash &>/dev/null; then
-    log "Upgrading Homebrew bash..." 2>&1 | indent
+    log "Upgrading Homebrew bash..."
     brew upgrade bash
   else
-    log "Installing Homebrew bash..." 2>&1 | indent
+    log "Installing Homebrew bash..."
     brew install bash
   fi
 
   if ! grep -qx "$BREW_BASH" /etc/shells 2>/dev/null; then
-    log "Registering '$BREW_BASH' in /etc/shells (requires sudo)..." 2>&1 | indent
-    log "$BREW_BASH" | sudo tee -a /etc/shells >/dev/null
+    log "Registering '$BREW_BASH' in /etc/shells (requires sudo)..."
+    echo "$BREW_BASH" | sudo tee -a /etc/shells >/dev/null
   fi
 
   ok "$($BREW_BASH --version | head -1)" 2>&1 | indent
