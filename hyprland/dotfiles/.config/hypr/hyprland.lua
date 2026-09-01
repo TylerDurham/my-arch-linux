@@ -9,6 +9,7 @@
 -- ###################################################################
 
 require("modules.autostart")
+require("modules.inputs")
 require("modules.monitors")
 require("modules.workspaces")
 require("modules.windows")
