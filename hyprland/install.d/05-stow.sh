@@ -1,19 +1,19 @@
 #!/usr/bin/env bash
 
-SOURCE="$REPO_ROOT/hyprland/dotfiles"
+SOURCE="$PROJECT_ROOT/hyprland/dotfiles"
 TARGET="$HOME/"
 
 on_init() {
-  echo "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..."
 }
 
 on_install() {
-  echo "Stowing '$SOURCE' to '$TARGET'..." 2>&1 | indent
+  log "Stowing '$SOURCE' to '$TARGET'..."
   stow --dir "$SOURCE" -S . -t "$TARGET"
 }
 
 on_uninstall() {
-  warn_badge "Unstowing '$SOURCE' from '$TARGET'..." 2>&1 | indent
+  warn_badge "Unstowing '$SOURCE' from '$TARGET'..."
   stow --dir "$SOURCE" -D . -t "$TARGET"
 }
 

@@ -1,4 +1,3 @@
-
 #!/usr/bin/env bash
 
 # Keep GNU stow from owning these directories
@@ -11,21 +10,21 @@ DIRECTORIES=(
 )
 
 on_init() {
-  echo "$(basename $module) initializing..." 2>&1 | indent
+  log "$(basename $module) initializing..."
 }
 
 on_install() {
-  echo "$(basename $module) installing..." 2>&1 | indent
+  log "$(basename $module) installing..."
   for dir in "${DIRECTORIES[@]}"; do
-    echo " - Creating directory at '$dir'..." 2>&1 | indent 
+    log "Creating directory at '$dir'..."
     mkdir -p "$dir"
   done
 }
 
 on_uninstall() {
-  echo "$(basename $module) uninstalling..." 2>&1 | indent
+  log "$(basename $module) uninstalling..."
   for dir in "${DIRECTORIES[@]}"; do
-    warn "Removing directory at '$dir'..." 2>&1 | indent
+    warn "Removing directory at '$dir'..."
     rm -rf "$dir"
   done
 }

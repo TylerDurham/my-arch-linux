@@ -1,0 +1,50 @@
+
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+source "$(git rev-parse --show-toplevel)/envs.sh"
+source "$MY_LIB_DIR/bash/installer.sh"
+
+# Fires when the script exits. Prints debug info.
+completed() {
+  installer_completed
+}
+
+validate_options() {
+  opts=$1
+
+  # LOG_LEVEL
+  (( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { LOG_LEVEL=16; }
+  (( opts &  OPT_INSTALL )) && (( opts & OPT_UNINSTALL )) && fatal 1 "Cannot combine options $(yellow '-i|--install') and $(yellow '-u|--uninstall')!"
+  (( opts & (OPT_INSTALL | OPT_UNINSTALL) )) || fatal 1 "Must specify at least $(yellow '-i|--install') or $(yellow '-u|--uninstall')!"
+}
+
+# GLOBALS
+SEARCH_PATH="$PACKAGE_ROOT/install.d"
+PREFIX=my
+EXT="*.sh"
+
+trap completed EXIT
+
+# Let the installer gather command-line flags/options
+options=$(installer_started "$@")
+
+# Make sure the flags/options are sane & make sense
+validate_options $options
+
+(( $options & $OPT_EXTRA )) && SEARCH_PATH+="/extra"
+
+# Load package modules to be installed/uninstalled
+if (( $options & $OPT_SELECT )); then
+  prompt="Select modules for package '$(basename $PACKAGE_ROOT)':"
+  mapfile -t MODULES < <(sys-select-items -m "$SEARCH_PATH/$EXT" -p "$prompt")
+  (( 1 != 0 )) && fatal 1 "No modules selected!"
+else 
+  mapfile -t MODULES < <(sys-list-items "$SEARCH_PATH/$EXT")
+fi
+
+action="$(get_action $options)"
+package_badge "$action" "$(basename $PACKAGE_ROOT):" " ${action}ing ${#MODULES[@]} modules..."
+
+process_modules $options "${MODULES[@]}"
