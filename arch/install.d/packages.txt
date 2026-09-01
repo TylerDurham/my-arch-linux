@@ -42,6 +42,8 @@ xdg-user-dirs           # creates and manages ~/Desktop, ~/Downloads, ~/Music, e
 zoxide                  # shell CD fuzzy finder
 zip                     # create and modify .zip archives
 zsh                     # Z shell - the login/interactive shell for this setup
+man-db
+man-pages
 
 # === media =================================================================
 mpv	                    # extra	media	mpv	General-purpose media player
