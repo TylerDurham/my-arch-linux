@@ -30,6 +30,7 @@ slurp                   # interactive region selector for Wayland (pairs with gr
 stow                    # GNU Stow - symlink farm manager, used to deploy the dotfiles
 swaync                  # GTK notification daemon and notification centre
 swayosd                 # on-screen display for volume, brightness and caps-lock
+terminus-font           # bitmap console fonts, provides ter-132b for a larger TTY font
 tmux                    # terminal multiplexer (persistent sessions, splits, windows)
 tree                    # prints directory contents as an indented tree
 ttf-jetbrains-mono-nerd # JetBrains Mono patched with Nerd Font glyphs/icons
