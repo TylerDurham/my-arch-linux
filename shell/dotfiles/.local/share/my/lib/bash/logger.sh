@@ -218,6 +218,8 @@ _print_sgr() {
   # No colors on terminals that don't support
   #[[ ! -t 2 ]] && { open=""; reset=""; }
 
+  # [[ -n $NO_COLOR ]]; printf '%s' "$text"
+
   # Nested helpers close with RESET, which would clear this span too. Re-open
   # ourselves after each one so our attribute survives past the inner span. The
   # pattern is quoted to keep bash from parsing "[0m" as a bracket expression.
@@ -486,13 +488,13 @@ fmt_badge() {
   local bg_color="${COLORS[BLACK]}"
   local pad; printf -v pad '%*s' "$BLOCK_PAD" ''
 
-  # if _has_truecolor; then
+  # if [[ -z NO_COLOR ]]; then
     local open
     open="$bg_color$accent_color"
     _print_sgr "$open" "$BADGE_BAR$pad$(bold $*)$pad"
   # else
-    # _resolve_ground "${ACCENT_ANSI[$accent]}" || return 1
-    # _print_sgr "$_OPEN" "$pad$*$pad"
+  #   # _resolve_ground "${ACCENT_ANSI[$accent]}" || return 1
+  #   _print_sgr "$pad$*$pad"
   # fi
 }
 
@@ -652,7 +654,7 @@ debug() {
 #   $@    the message
 debug_badge() {
   _debug_enabled || return 0
-  fmt_badge PURPLE "DEBUG" >&2; echo " $@" >&2;
+  fmt_badge PURPLE " DEBUG" >&2; echo " $@" >&2;
 }
 
 # Report an unrecoverable error and TERMINATE THE SCRIPT.
