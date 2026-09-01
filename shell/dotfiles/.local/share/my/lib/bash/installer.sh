@@ -11,50 +11,6 @@ declare -g -r OPT_VERBOSE=16
 declare -g -r OPT_PACKAGE=32
 declare -g -r OPT_DRYRUN=64
 
-# package_badge <install|remove> <package...>
-# Prints a colored badge with an install/remove icon followed by the package list.
-# Globals: none
-# Arguments:
-#   $1 - action ("install" or anything else, treated as "remove")
-#   $@ (after shift) - package name(s) to display
-# Outputs:
-#   Writes formatted badge line to stdout via fmt_badge
-# Returns:
-#   0
-package_badge() {
-  local action="$1"; local name="$2"; shift;
-  local icon
-  if [[ "$action" == "install" ]]; then
-      icon="󱧕"
-  else
-      icon=="󱧙"
-  fi
-
-  shift; fmt_badge GREEN "$icon PKG ${name^^}"; echo "$*"
-}
-
-# module_badge <install|remove> <package...>
-# Prints a colored badge with an install/remove icon followed by the package list.
-# Globals: none
-# Arguments:
-#   $1 - action ("install" or anything else, treated as "remove")
-#   $@ (after shift) - package name(s) to display
-# Outputs:
-#   Writes formatted badge line to stdout via fmt_badge
-# Returns:
-#   0
-module_badge() {
-  local action="$1"; local name="$2"; shift;
-  local icon
-  if [[ "$action" == "install" ]]; then
-      icon=""
-  else
-      icon=="󰉘"
-  fi
-
-  shift; fmt_badge BLUE "$icon MOD ${name^^}"; echo "$*"
-}
-
 # Converts the set bits to their string equivalents.
 get_options_str() {
   options=$1

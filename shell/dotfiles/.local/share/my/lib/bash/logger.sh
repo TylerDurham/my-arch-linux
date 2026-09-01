@@ -690,6 +690,50 @@ fatal_badge() {
   exit ${1}
 }
 
+# package_badge <install|remove> <package...>
+# Prints a colored badge with an install/remove icon followed by the package list.
+# Globals: none
+# Arguments:
+#   $1 - action ("install" or anything else, treated as "remove")
+#   $@ (after shift) - package name(s) to display
+# Outputs:
+#   Writes formatted badge line to stdout via fmt_badge
+# Returns:
+#   0
+package_badge() {
+  local action="$1"; local name="$2"; shift;
+  local icon
+  if [[ "$action" == "install" ]]; then
+      icon="󱧕"
+  else
+      icon=="󱧙"
+  fi
+
+  shift; fmt_badge GREEN "$icon PKG ${name^^}"; echo "$*"
+}
+
+# module_badge <install|remove> <package...>
+# Prints a colored badge with an install/remove icon followed by the package list.
+# Globals: none
+# Arguments:
+#   $1 - action ("install" or anything else, treated as "remove")
+#   $@ (after shift) - package name(s) to display
+# Outputs:
+#   Writes formatted badge line to stdout via fmt_badge
+# Returns:
+#   0
+
+module_badge() {
+  local action="$1"; local name="$2"; shift;
+  local icon
+  if [[ "$action" == "install" ]]; then
+      icon=""
+  else
+      icon=="󰉘"
+  fi
+
+  shift; fmt_badge BLUE "$icon MOD ${name^^}"; echo "$*"
+}
 success() {
   local label="$(bold $(green '[OK]'))"
   echo "$label ${@}" >&2
