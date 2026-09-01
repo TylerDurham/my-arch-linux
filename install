@@ -2,83 +2,21 @@
 
 set -euo pipefail
 
-declare -r REPO_ROOT="$(git rev-parse --show-toplevel)"
-export MY_LIB_DIR="$REPO_ROOT/shell/dotfiles/.local/share/my/lib"
-export PATH="$REPO_ROOT/shell/dotfiles/.local/share/my/bin:$PATH"
-
-#source "$REPO_ROOT/install.d/lib/envs.sh"
-source "$MY_LIB_DIR/bash/installer.sh"
-
-# Fires when the script exits. Prints debug info.
-completed() {
-
-  (( LOG_LEVEL >= 8 )) && {
-    echo 
-    debug_badge "$(basename $0)"
-    debug "OPTIONS: $(printf '%d = 0x%x = ' "$OPTIONS" "$OPTIONS")$(to_binary $OPTIONS)"
-    debug "OPT_EXTRA: $(( OPTIONS & OPT_EXTRA ))"
-    debug "OPT_INSTALL: $(( OPTIONS & OPT_INSTALL ))"
-    debug "OPT_SELECT: $(( OPTIONS & OPT_SELECT ))"
-    debug "OPT_UNINSTALL: $(( OPTIONS & OPT_UNINSTALL ))"
-    debug "SEARCH_PATH: $SEARCH_PATH"
-    debug "MODULES: "
-    for module in "${MODULES[@]}"; do echo "$module" | indent; done;
-
-    echo 
-    debug_badge "ENV"
-    debug "LOG_LEVEL: $LOG_LEVEL"
-    debug "MY_LIB_DIR: $MY_LIB_DIR"
-    debug "REPO_ROOT: $REPO_ROOT"
-  }
+get_packages() {
+  find . -maxdepth 2 -type d \
+    -exec test -f '{}/install' \; \
+    -exec test -d '{}/install.d' \; \
+    -print
 }
 
-# GLOBALS
-SEARCH_PATH="./install.d/"
-PREFIX=my
+get_modules() {
+  find . -maxdepth 2 -type d \
+    -exec test -f '{}/install.d/*.sh' \; \
+    -print
+}
 
-trap completed EXIT
+mapfile -t packages < <(get_packages)
 
-while [[ "$#" -gt 0 ]]; do 
-  case "$1" in 
-    -h|--help) ACTION="HELP"; shift; ;;
-    -d|--directory) SEARCH_PATH="$2"; shift 2 ;;
-    -i|--install) OPTIONS=$(( OPTIONS | OPT_INSTALL )); shift; ;;
-    -u|--uninstall) OPTIONS=$(( OPTIONS | OPT_UNINSTALL )); shift ;;
-    -s|--select) OPTIONS=$(( OPTIONS | OPT_SELECT )); shift ;;
-    -x|--extra) OPTIONS=$(( OPTIONS | OPT_EXTRA )); shift ;;
-    -v|--verbose) OPTIONS=$(( OPTIONS | OPT_VERBOSE )); shift ;;
-    *) break ;;
-  esac
-done
-
-# LOG_LEVEL
-(( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { LOG_LEVEL=16; }
-
-# Sanity check
-source "./install.d/lib/prerequisites.sh"
-
-# # Install shell
-# info "Checking status of shell..."
-# mapfile -t shell_modules < <(sys-list-items "./install.d/shell/*.sh")
-# echo ${shell_modules[@]}
-# process_modules $OPTIONS "${shell_modules[@]}"
-# exit
-#
-# Set search path 
-if (( (OPTIONS & OPT_EXTRA) == OPT_EXTRA )); then
-  SEARCH_PATH="$SEARCH_PATH/extra/*.sh"
-  debug "Using extra search path '$SEARCH_PATH'."
-else
-  SEARCH_PATH="$SEARCH_PATH/*.sh"
-  debug "Using default search path '$SEARCH_PATH'."
-fi
-
-# Gather modules
-if (( (OPTIONS & OPT_SELECT) == OPT_SELECT )); then
-  mapfile -t MODULES < <(sys-select-items -m "$SEARCH_PATH")
-else
-  mapfile -t MODULES < <(sys-list-items "$SEARCH_PATH")
-fi
-
-process_modules $OPTIONS "${MODULES[@]}"
-
+for package in ${packages[@]}; do 
+  echo "$package"
+done | fzf --prompt "Select one or more packages:" -m
