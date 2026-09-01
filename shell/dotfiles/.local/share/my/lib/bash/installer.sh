@@ -1,5 +1,9 @@
 
-source "$MY_LIB_DIR/bash/logger.sh"
+# Libraries
+dependancies=(logger err_codes text)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
 
 MODULES=()
 OPTIONS=0
@@ -11,37 +15,50 @@ declare -g -r OPT_VERBOSE=16
 declare -g -r OPT_PACKAGE=32
 declare -g -r OPT_DRYRUN=64
 
-# Converts the set bits to their string equivalents.
-get_options_str() {
-  options=$1
-  for bit in \
-    OPT_SELECT \
-    OPT_EXTRA \
-    OPT_INSTALL \
-    OPT_UNINSTALL \
-    OPT_VERBOSE \
-    OPT_PACKAGE \
-    OPT_DRYRUN \
-    ;
-  do
-    val=${!bit}
-    if (( options & val )); then
-      echo $(green "$bit")
-    else
-      echo $(dim "$bit")
-    fi
+declare -ra INSTALLER_OPTIONS=(
+    OPT_SELECT
+    OPT_EXTRA
+    OPT_INSTALL
+    OPT_UNINSTALL
+    OPT_VERBOSE
+    OPT_PACKAGE
+    OPT_DRYRUN
+)
+
+installer_started() {
+  while [[ "$#" -gt 0 ]]; do 
+    case "$1" in 
+      -h|--help) ACTION="HELP"; shift; ;;
+      -i|--install) OPTIONS=$(( OPTIONS | OPT_INSTALL )); shift; ;;
+      -n|--dryrun) OPTIONS=$(( OPTIONS | OPT_DRYRUN )); shift; ;;
+      -u|--uninstall) OPTIONS=$(( OPTIONS | OPT_UNINSTALL )); shift ;;
+      -s|--select) OPTIONS=$(( OPTIONS | OPT_SELECT )); shift ;;
+      -x|--extra) OPTIONS=$(( OPTIONS | OPT_EXTRA )); shift ;;
+      -v|--verbose) OPTIONS=$(( OPTIONS | OPT_VERBOSE )); shift ;;
+      *) break ;;
+    esac
   done
+
+  echo "${OPTIONS[@]}"
 }
 
-validate_options() {
-  opts=$1
-
-  # LOG_LEVEL
-  (( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { LOG_LEVEL=16; }
-  # (( (opts & OPT_SELECT) && !(opts & OPT_PACKAGE) )) && fatal 1 "Cannot use option $(yellow '-s|--select') without $(yellow '-p|--package!')"
-  (( opts &  OPT_INSTALL )) && (( opts & OPT_UNINSTALL )) && fatal 1 "Cannot combine options $(yellow '-i|--install') and $(yellow '-u|--uninstall')!"
-  (( opts & (OPT_INSTALL | OPT_UNINSTALL) )) || fatal 1 "Must specify at least $(yellow '-i|--install') or $(yellow '-u|--uninstall')!"
+installer_completed() {
+  (( LOG_LEVEL >= 8 )) && {
+    echo 
+    debug_badge "$(basename $0)"
+    debug "OPTIONS: "
+    echo "$(printf '%d = 0x%x = ' "$OPTIONS" "$OPTIONS")$(to_binary $OPTIONS)" | indent
+    for opt in $(print_bitmask_names INSTALLER_OPTIONS "${OPTIONS[@]}"); do echo "$opt" | indent; done;
+    debug "SEARCH_PATH: $SEARCH_PATH"
+    debug "MODULES: "
+    for module in "${MODULES[@]}"; do echo "$module" | indent; done;
+    debug_badge "ENV"
+    debug "LOG_LEVEL: $LOG_LEVEL"
+    debug "MY_LIB_DIR: $MY_LIB_DIR"
+    debug "REPO_ROOT: $REPO_ROOT"
+  }
 }
+
 
 # Reads the install/uninstall bit from the bitmask
 get_action() {
@@ -56,15 +73,6 @@ get_action() {
   fi
 }
 
-# Converts the set bits to their binary equivalents
-to_binary() {
-    local -i n=$1 width=${2:-8}
-    local bits=""
-    for (( i = width - 1; i >= 0; i-- )); do
-        bits+=$(( (n >> i) & 1 ))
-    done
-    printf '%s\n' "$bits"
-}
 
 process_package() {
   local root="$(pwd)"

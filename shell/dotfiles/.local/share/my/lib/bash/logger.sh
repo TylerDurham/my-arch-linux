@@ -677,7 +677,7 @@ debug_badge() {
 # The label carries a Nerd Font glyph (U+EA87) ahead of [FATAL]; terminals
 # without a patched font render it as a replacement box.
 fatal() {
-  echo "$(bold $(red ' [FATAL]')) ${*:2}: ${BASH_SOURCE[1]} Line $LINENO" >&2
+  echo "$(bold $(red ' [FATAL]')) ${*:2}: ${BASH_SOURCE[1]} Line ${BASH_LINENO[0]}" >&2
   exit ${1}
 }
 
