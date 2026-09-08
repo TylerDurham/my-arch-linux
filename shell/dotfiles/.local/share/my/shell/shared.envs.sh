@@ -78,7 +78,19 @@ export NVM_DIR="$HOME/.nvm"
 # =======================================================================================
 # HOOKs: Run ENV hooks set by other repos
 # =======================================================================================
-for hook in $HOME/.local/share/my/shell/hooks/envs/*.sh; do 
+if [ -n "$ZSH_VERSION" ]; then
+  setopt nullglob
+elif [ -n "$BASH_VERSION" ]; then
+  shopt -s nullglob
+fi
+
+for hook in $HOME/.local/share/my/shell/hooks/envs/*.sh; do
   # echo "Running hook '$(basename $hook)'..."
   source "$hook"
 done
+
+if [ -n "$ZSH_VERSION" ]; then
+  unsetopt nullglob
+elif [ -n "$BASH_VERSION" ]; then
+  shopt -u nullglob
+fi

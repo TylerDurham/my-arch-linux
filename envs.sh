@@ -13,6 +13,8 @@ export PACKAGES=(
   neovim
 )
 
+export LOG_LEVEL=8
+
 # Repo root, resolved via git so it works no matter which directory the
 # caller was invoked from.
 export PROJECT_ROOT=$(git rev-parse --show-toplevel)
