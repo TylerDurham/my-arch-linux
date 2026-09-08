@@ -14,7 +14,7 @@ validate_options() {
   opts=$1
 
   # LOG_LEVEL
-  (( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { LOG_LEVEL=16; }
+  (( (OPTIONS & OPT_VERBOSE ) == OPT_VERBOSE )) && { export LOG_LEVEL=16; }
   (( opts &  OPT_INSTALL )) && (( opts & OPT_UNINSTALL )) && fatal 1 "Cannot combine options $(yellow '-i|--install') and $(yellow '-u|--uninstall')!"
   (( opts & (OPT_INSTALL | OPT_UNINSTALL) )) || fatal 1 "Must specify at least $(yellow '-i|--install') or $(yellow '-u|--uninstall')!"
 }
