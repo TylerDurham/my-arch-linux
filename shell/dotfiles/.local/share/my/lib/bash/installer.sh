@@ -143,7 +143,7 @@ process_module() {
     hook="on_${action}"
     declare -F "$hook" >/dev/null \
       && "$hook" \
-      || { error "Module '$module_path' does not define ${hook}()."; exit "$EX_NOINPUT"; }
+      || { error "Module '$module_path' does not define ${hook}()."; exit "$ENOSYS"; }
 
     # Call 'on_completed' hook if it exists
     if declare -F "on_completed" >/dev/null; then

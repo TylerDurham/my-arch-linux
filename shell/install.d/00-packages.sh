@@ -26,9 +26,11 @@ on_install() {
 }
 
 on_uninstall() {
-  os=$(sys-get-os)
+  local os=$(sys-get-os)
+  local pkg_file="$SEARCH_PATH/${os}-packages.txt"
 
+  mapfile -t packages < <(read_package_list "$pkg_file")
   if [[ "$os" == "arch" ]]; then
-    sudo pacman -Ry --noconfirm "${arch_packages[@]}"
+    sudo pacman -R --noconfirm "${packages[@]}"
   fi
 }
