@@ -55,7 +55,7 @@ installer_completed() {
     debug_badge "ENV"
     debug "LOG_LEVEL: $LOG_LEVEL"
     debug "MY_LIB_DIR: $MY_LIB_DIR"
-    debug "REPO_ROOT: $REPO_ROOT"
+    debug "PROJECT_ROOT: $PROJECT_ROOT"
   }
 }
 
