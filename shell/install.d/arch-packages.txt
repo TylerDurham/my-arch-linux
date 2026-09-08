@@ -1,0 +1,10 @@
+  bash-completion
+  bat
+  curl
+  git
+  lsd
+  neovim
+  starship
+  stow
+  tree
+  zsh

@@ -38,7 +38,7 @@ validate_options $options
 if (( $options & $OPT_SELECT )); then
   prompt="Select modules for package '$(basename $PACKAGE_ROOT)':"
   mapfile -t MODULES < <(sys-select-items -m "$SEARCH_PATH/$EXT" -p "$prompt")
-  (( 1 != 0 )) && fatal 1 "No modules selected!"
+  # (( 1 != 0 )) && fatal 1 "No modules selected!"
 else 
   mapfile -t MODULES < <(sys-list-items "$SEARCH_PATH/$EXT")
 fi
