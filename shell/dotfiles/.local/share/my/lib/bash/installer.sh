@@ -167,6 +167,11 @@ process_modules() {
     fatal 1 "No action specified."
   }
 
+  [[ "$action" == "uninstall" ]] && {
+    # HACK: Process uninstall modules in reverse
+    mapfile -t modules < <(printf '%s\n' "${modules[@]}" | sort -rV)
+  }
+
   for module in "${modules[@]}"; do 
     process_module $options "$module"
   done

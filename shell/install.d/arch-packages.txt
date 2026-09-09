@@ -5,5 +5,4 @@
   starship
   stow
   tree
-  which
   zsh
