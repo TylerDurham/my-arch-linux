@@ -1,8 +1,7 @@
-# nwg-displays: machine-specific monitor/workspace config, rewritten on disk
-# every time a profile is saved. hyprland.lua guards its requires of these
-# (see modules/lib/optional.lua) so a checkout without them still boots.
+# nwg-displays writes these on every profile save; hyprland.lua guards its
+# requires of them (see modules/lib/optional.lua) so a checkout without them
+# still boots. The nwg-displays profile definitions themselves stay tracked.
 /hyprland/dotfiles/.config/hypr/monitors.lua
 /hyprland/dotfiles/.config/hypr/monitors.conf
 /hyprland/dotfiles/.config/hypr/workspaces.lua
 /hyprland/dotfiles/.config/hypr/workspaces.conf
-/hyprland/dotfiles/.config/nwg-displays/
