@@ -5,5 +5,5 @@ hl.window_rule({
   match = {
     class = "^(obsidian)$"
   },
-  workspace = "4"
+  workspace = "3"
 })
