@@ -59,6 +59,7 @@ gnome-keyring	          # extra	desktop	gnome-keyring	Secret Service provider (o
 libsecret	              # core	desktop	libsecret	Keyring access library for GNOME secrets
 dconf	                  # extra	desktop	dconf	GSettings configuration backend
 nwg-look	              # extra	desktop	nwg-look	GTK theme switcher for wlroots compositors
+nwg-displays            # GTK app for managing Hyprland monitors and workspaces.
 gvfs	                  # extra	desktop	gvfs	Virtual filesystem for GNOME (trash, mtp, network mounts)
 pavucontrol	            # extra	desktop	pavucontrol	PulseAudio/PipeWire volume control GUI
 rtkit	                  # extra	desktop	rtkit	Realtime scheduling policy daemon (PipeWire needs it to avoid audio crackle)

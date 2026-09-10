@@ -16,7 +16,6 @@ local FILE_MANAGER = g.programs.FILE_MANAGER
 local BROWSER     = g.programs.BROWSER
 local NOTES       = g.programs.NOTES
 
-local monitors = require("modules.monitors")
 local layouts = require("modules.layouts")
 
 ----------------------------------
@@ -110,9 +109,6 @@ hl.bind(MAIN_MOD .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/chan
 hl.bind(MAIN_MOD .. " + W",         hl.dsp.exec_cmd("hypr-cycle-wallpaper"),    { description = "󰒭 Next Wallpaper" })
 hl.bind(MAIN_MOD .. " + CTRL + W",  hl.dsp.exec_cmd("hypr-cycle-wallpaper -p"), { description = "󰒮 Previous Wallpaper" })
 hl.bind(MAIN_MOD .. " + ALT + W",   hl.dsp.exec_cmd("hypr-cycle-wallpaper -r"), { description = "󰒟 Random Wallpaper" })
-
--- Monitor diagnostics
-hl.bind("SUPER + CTRL + SHIFT + M", monitors.monitor_status, { description = "󰍺 Show Monitor Status" })
 
 ----------------------------------
 ---- MEDIA -----------------------

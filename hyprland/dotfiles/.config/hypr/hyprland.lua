@@ -10,8 +10,8 @@
 
 require("modules.autostart")
 require("modules.inputs")
-require("modules.monitors")
-require("modules.workspaces")
+require("monitors")
+require("workspaces")
 require("modules.windows")
 require("modules.looknfeel")
 require("modules.layouts")
