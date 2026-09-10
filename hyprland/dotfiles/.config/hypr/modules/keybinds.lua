@@ -23,10 +23,10 @@ local layouts = require("modules.layouts")
 ---- APPLICATIONS ----------------
 ----------------------------------
 
-hl.bind(MAIN_MOD .. " + Return", hl.dsp.exec_cmd(TERMINAL),      { description = " Launch Terminal (" .. TERMINAL .. ")" })
+hl.bind(MAIN_MOD .. " + Return", hl.dsp.exec_cmd(TERMINAL),      { description = " Launch Terminal (" .. TERMINAL .. ")" })
 hl.bind(MAIN_MOD .. " + Space",  hl.dsp.exec_cmd(APP_LAUNCHER),  { description = "󱓞 Launch App Launcher" })
 hl.bind(MAIN_MOD .. " + B",      hl.dsp.exec_cmd(BROWSER),       { description = "󰖟 Launch Browser (" .. BROWSER .. ")" })
-hl.bind(MAIN_MOD .. " + E",      hl.dsp.exec_cmd(FILE_MANAGER),  { description = " Launch File Manager (" .. FILE_MANAGER .. ")" })
+hl.bind(MAIN_MOD .. " + E",      hl.dsp.exec_cmd(FILE_MANAGER),  { description = "󱞊 Launch File Manager (" .. FILE_MANAGER .. ")" })
 hl.bind(MAIN_MOD .. " + N",      hl.dsp.exec_cmd(NOTES),         { description = "󰠮 Launch Notes (" .. NOTES .. ")" })
 hl.bind(MAIN_MOD .. " + K",      hl.dsp.exec_cmd("~/.local/share/my/bin/hypr-show-keybinds"), { description = "󰌌 Show Keybinds" })
 
