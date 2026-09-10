@@ -141,15 +141,13 @@
     "on-click": "activate",
     "sort-by-number": true,
     "format-icons": {
-      "1": "",
-      "2": "",
-      "3": "󰹕",
-      "9": "",
-      "10": "󰒃"
+      "1": "",         // Terminal
+      "2": "",         // Browser
+      "3": "󰹕",         // Notes
+      "9": "",         // Media
+      "10": "󰒃"         // Security/System
     },
-    "persistent-workspaces": {
-      "*": 5 // 5 workspaces by default on every monitor
-    }
+    "on-click": "activate"
   },
 
   "tray": {
