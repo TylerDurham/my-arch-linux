@@ -25,7 +25,8 @@
   "custom/launcher": {
     "exec": "~/.local/share/my/bin/sys-get-os-icon",
     "format": "{}",
-    "on-click": "rofi-launch-module ~/.config/rofi/modules/system.json"
+    "on-click": "hypr-launch-applications",
+    "on-click-right": "rofi-launch-module ~/.config/rofi/modules/system.json"
   },
   "hyprland/window": {
     "max-length": 50

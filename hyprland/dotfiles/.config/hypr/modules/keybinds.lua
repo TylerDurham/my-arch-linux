@@ -99,11 +99,12 @@ hl.gesture({ fingers = 4, direction = "pinchout",   scale = 1.5, action = "fulls
 ---- SYSTEM ----------------------
 ----------------------------------
 
-hl.bind(MAIN_MOD .. " + A",         hl.dsp.exec_cmd("swaync-client -t"),                                      { description = "󰂚 Toggle Notification Center" })
-hl.bind(MAIN_MOD .. " + SHIFT + L", hl.dsp.exec_cmd("hypr-lock"),                                             { description = "󰌾 Lock Screen" })
-hl.bind(MAIN_MOD .. " + SHIFT + S", hl.dsp.exec_cmd("rofi-launch-module ~/.config/rofi/modules/system.json"), { description = "󰒲 System Control Menu" })
-hl.bind(MAIN_MOD .. " + SHIFT + N", hl.dsp.exec_cmd("~/.local/bin/hypr-toggle-nightlight"),                  { description = "󰖔 Toggle Nightlight" })
-hl.bind(MAIN_MOD .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/change-wallpaper.sh"),           { description = " Change Wallpaper" })
+hl.bind(MAIN_MOD .. " + A",         hl.dsp.exec_cmd("swaync-client -t"),                                      { description = "󰂚 System: Toggle Notification Center" })
+hl.bind(MAIN_MOD .. " + SHIFT + R", hl.dsp.exec_cmd("hypr-restart-theme"),                                    { description = " System: Restart theme by reloading Rofi, Waybar, and Hyprland"})
+hl.bind(MAIN_MOD .. " + SHIFT + L", hl.dsp.exec_cmd("hypr-lock"),                                             { description = "󰌾 System: Lock Screen" })
+hl.bind(MAIN_MOD .. " + SHIFT + S", hl.dsp.exec_cmd("rofi-launch-module ~/.config/rofi/modules/system.json"), { description = " System: Control Menu" })
+hl.bind(MAIN_MOD .. " + SHIFT + N", hl.dsp.exec_cmd("~/.local/bin/hypr-toggle-nightlight"),                   { description = "󰖔 System: Toggle Nightlight" })
+hl.bind(MAIN_MOD .. " + SHIFT + W", hl.dsp.exec_cmd("~/.config/hypr/scripts/change-wallpaper.sh"),            { description = "󰸉 System: Change Wallpaper" })
 
 -- Cycle the wallpapers bundled with the active theme
 hl.bind(MAIN_MOD .. " + W",         hl.dsp.exec_cmd("hypr-cycle-wallpaper"),    { description = "󰒭 Next Wallpaper" })
