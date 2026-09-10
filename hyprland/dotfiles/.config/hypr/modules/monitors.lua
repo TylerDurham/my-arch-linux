@@ -25,6 +25,11 @@ M.config = {
 		position = "0x0",
 		scale = 1.33,
 	},
+	portable = {
+		output = "desc:XYM M156F1 demoset-1",
+		mode = "1920x1080@60.00",
+		scale = 1,
+	},
 	builtin = {
 		name = "eDP-1",
 		scale = 1,
@@ -53,6 +58,10 @@ M.left = function()
 	return M.get_ref(M.config.left)
 end
 
+M.portable = function()
+	return M.get_ref(M.config.portable)
+end
+
 M.builtin = function()
 	for _, monitor in ipairs(hl.get_monitors()) do
 		if string.sub(monitor.name, 1, 3) == "eDP" then
@@ -68,6 +77,9 @@ if M.config ~= nil then
 	end
 	if M.config.left ~= nil then
 		hl.monitor(M.config.left)
+	end
+	if M.config.portable ~= nil then
+		hl.monitor(M.config.portable)
 	end
 end
 
@@ -93,6 +105,7 @@ end
 M.monitor_status = function()
 	local r_monitor = M.right()
 	local l_monitor = M.left()
+	local p_monitor = M.portable()
 	local b_monitor = M.builtin()
 
 	local function fmt(m)
@@ -101,9 +114,10 @@ M.monitor_status = function()
 	end
 
 	local buffer = {
-		"RIGHT MONITOR", fmt(r_monitor), "",
-		"LEFT MONITOR",  fmt(l_monitor), "",
-		"BUILT-IN",      fmt(b_monitor),
+		"RIGHT MONITOR",    fmt(r_monitor), "",
+		"LEFT MONITOR",     fmt(l_monitor), "",
+		"PORTABLE MONITOR", fmt(p_monitor), "",
+		"BUILT-IN",         fmt(b_monitor),
 	}
 
 	hl.notification.create({
