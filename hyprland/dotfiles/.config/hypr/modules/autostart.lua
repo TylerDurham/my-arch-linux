@@ -23,4 +23,6 @@ hl.on("hyprland.start", function()
   hl.exec_cmd"~/.config/hypr/scripts/check-theme.sh"
   hl.exec_cmd("awww img ~/.config/my/background")
   hl.exec_cmd("blueman-applet")
+  hl.exec_cmd("dropbox-cli start")
+  hl.exec_cmd("1password")
 end)
