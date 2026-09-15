@@ -35,6 +35,22 @@ return {
       local dap = require("dap")
       local dapui = require("dapui")
 
+      -- dap.configurations.go = {
+      --   {
+      --     type = "go",
+      --     name = "Debug (prompt for file)",
+      --     request = "launch",
+      --     program = function()
+      --       return vim.fn.input("Path to file: ", vim.fn.getcwd() .. "/", "file")
+      --     end,
+      --   },
+      -- }
+
+      -- Merge in any project-local .vscode/launch.json configs (e.g. per-repo
+      -- hardcoded program/args). "go" isn't in the built-in type->filetype
+      -- map, so it's passed explicitly here.
+      -- require("dap.ext.vscode").load_launchjs(nil, { go = { "go" } })
+
       -- Registers the "go" adapter (Mason's dlv, found via PATH) and the standard
       -- launch configurations: debug package, debug test, attach to process.
       require("dap-go").setup()
