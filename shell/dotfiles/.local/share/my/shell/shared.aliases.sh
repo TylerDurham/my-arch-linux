@@ -22,7 +22,7 @@ alias lg='lsd --icon auto -l --group-directories-first'
 # ==========================================================================================
 
 # Install one or more packages.
-pi() {
+pmi() {
   if [ -f "/etc/arch-release" ]; then
     yay -S --noconfirm --needed --quiet "$@"
   elif [ "$(uname -s)" == "Darwin" ]; then
