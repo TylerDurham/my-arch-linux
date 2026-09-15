@@ -24,7 +24,7 @@ alias lg='lsd --icon auto -l --group-directories-first'
 # Install one or more packages.
 pmi() {
   if [ -f "/etc/arch-release" ]; then
-    yay -S --noconfirm --needed --quiet "$@"
+    pacmany -S --noconfirm --needed --quiet "$@"
   elif [ "$(uname -s)" == "Darwin" ]; then
     brew install --quiet "$@"
   else
@@ -36,7 +36,7 @@ pmi() {
 # Query for a single package.
 pmq() {
   if [ -f "/etc/arch-release" ]; then
-    yay -Ss "$1"
+    pacman -Ss "$1"
   elif [ "$(uname -s)" == "Darwin" ]; then
     brew list "$1"
   else
@@ -48,7 +48,7 @@ pmq() {
 # Remove one or more packages.
 pmr() {
   if [ -f "/etc/arch-release" ]; then
-    yay -R "$@"
+    pacman -R "$@"
   elif [ "$(uname -s)" == "Darwin" ]; then
     brew remove --quiet "$@"
   else
