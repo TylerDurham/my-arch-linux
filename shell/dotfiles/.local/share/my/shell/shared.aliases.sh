@@ -34,7 +34,7 @@ pmi() {
 }
 
 # Query for a single package.
-pq() {
+pmq() {
   if [ -f "/etc/arch-release" ]; then
     yay -Ss "$1"
   elif [ "$(uname -s)" == "Darwin" ]; then
@@ -46,7 +46,7 @@ pq() {
 }
 
 # Remove one or more packages.
-pr() {
+pmr() {
   if [ -f "/etc/arch-release" ]; then
     yay -R "$@"
   elif [ "$(uname -s)" == "Darwin" ]; then
