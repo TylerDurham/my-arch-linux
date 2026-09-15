@@ -24,7 +24,7 @@ alias lg='lsd --icon auto -l --group-directories-first'
 # Install one or more packages.
 pmi() {
   if [ -f "/etc/arch-release" ]; then
-    pacmany -S --noconfirm --needed --quiet "$@"
+    pacman -S --noconfirm --needed --quiet "$@"
   elif [ "$(uname -s)" == "Darwin" ]; then
     brew install --quiet "$@"
   else
