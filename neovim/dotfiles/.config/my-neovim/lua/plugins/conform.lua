@@ -13,6 +13,7 @@ return {
       templ = { 'templ' },
       sh = { 'shfmt' },
       nix = { 'nixfmt' },
+      yaml = { 'yamlfix' },
     },
   },
 }
