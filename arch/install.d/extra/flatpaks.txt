@@ -1,3 +1,4 @@
 tv.plex.PlexDesktop            # Plex media client
 com.plexamp.Plexamp            # Plexamp music player
 com.github.tchx84.Flatseal     # GUI for reviewing and editing flatpak permissions
+org.libreoffice.LibreOffice    # Free and open-source office suite
