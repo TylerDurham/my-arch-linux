@@ -1,0 +1,184 @@
+#!/usr/bin/env bash
+
+# sys-install-appimage
+#
+# Install an AppImage application, or remove one that was installed.
+#
+# USAGE:
+#   sys-install-appimage <path/to/AppImage>        # install (pick via fzf if omitted)
+#   sys-install-appimage -r <path/to/AppImage>     # remove (pick via fzf if omitted)
+
+set -uo pipefail
+
+# libs
+dependancies=(logger err_codes)
+if ! . "$MY_LIB_DIR/bash/require.sh" ${dependancies[@]}; then
+  echo "FATAL: Could not load dependancies '${dependancies[@]}' from '$MY_LIB_DIR'!" >&2; exit 2
+fi
+
+# Called when script exits
+completed() {
+  rm -rf "$TMP_DIR"
+
+  (( LOG_LEVEL >= 8 )) && {
+    echo "" >&2
+    debug_badge "$(basename $0)"
+    debug "BIN_DIR: ${BIN_DIR}" 2>&1 | indent 2 # >&2
+    debug "SRC_APP_IMAGE_PATH: $SRC_APP_IMAGE_PATH" 2>&1 | indent 2 # >&2
+    debug "TMP_APP_IMAGE_PATH: $TMP_APP_IMAGE_PATH" 2>&1 | indent 2 # >&2
+    debug "TMP_DIR: ${TMP_DIR}" 2>&1 | indent 2 # >&2
+    echo "" >&2
+  }
+}
+
+trap completed EXIT
+
+# Install locations (shared by install and remove).
+TMP_DIR=
+REMOVE=
+SRC_APP_IMAGE_PATH=       # Path to AppImage to install
+TMP_APP_IMAGE_PATH=       # Path to AppImage in tmp directory
+BIN_DIR="$HOME/.local/bin"
+icon_dst="$HOME/.local/share/icons/hicolor/48x48/apps/"
+desktop_dst="$HOME/.local/share/applications"
+
+while [[ "$#" -gt 0 ]]; do 
+  case "$1" in 
+    -r|--remove) REMOVE=1; shift ;;
+    -v|--verbose) export LOG_LEVEL=16; shift ;;
+    *) SRC_APP_IMAGE_PATH="$1"; shift ;;
+  esac
+done
+
+# Resolve the target appimage: an argument, or a pick from ~/Downloads (install)
+# or the already-installed copies in ~/.local/bin (remove).
+if [[ "$SRC_APP_IMAGE_PATH" == "" ]]; then
+  if [[ -n "$REMOVE" ]]; then
+    SRC_APP_IMAGE_PATH="$(find "$BIN_DIR" -maxdepth 1 -iname '*.AppImage' -print | fzf --prompt 'Remove AppImage: ')"
+  else
+    SRC_APP_IMAGE_PATH="$(find "$HOME/Downloads" -maxdepth 1 -iname '*.AppImage' -print | fzf --prompt 'Install AppImage: ')"
+  fi
+else
+  SRC_APP_IMAGE_PATH="$1"
+fi
+
+# Extracts the binary file name from the 'Exec' field in the desktop file
+bin_name_from_desktop_file() {
+  local desktop="$1"
+
+  // Get the line containing the 'Exec' field
+  local exec_line=$(sed -n 's/^Exec=//p' "$desktop" | head -n1)
+
+  // Get binary name without flags, args, etc.
+  local bin_name=$(echo "$exec_line" | awk '{print $1}')
+
+  echo "$bin_name"
+}
+
+# Remove the AppImage, its icon, and its desktop file, then rebuild the cache.
+remove() {
+  echo "$appimage"
+
+  dest="$desktop_dst/$(basename "$appimage" .AppImage).desktop"
+
+   # Icon file name(s) taken from the installed desktop entry.
+  icon_field="$(sed -n 's/^Icon=//p' "$dest" 2>/dev/null | head -n1)"
+  while IFS=: read -r name; do
+      [[ -n "$name" ]] || continue
+      [[ "$name" = /* ]] || name="$(basename "$name")"
+      rm -f "$icon_dst/$name"
+  done <<< "$icon_field"
+
+  rm -f "$BIN_DIR/$(basename "$appimage")"
+  rm -f "$dest"
+
+  if command -v update-desktop-database >/dev/null; then
+    update-desktop-database "$desktop_dst"
+  else
+    echo "update-desktop-database not found; skipping cache refresh." >&2
+  fi
+}
+
+[[ -n "$REMOVE" ]] && remove && exit 0
+
+# 1. Copy the selected AppImage into a tmp directory.
+TMP_DIR="$(mktemp -d -t AppImage-XXXXXXX)"
+
+# 2. Make it executable.
+TMP_APP_IMAGE_PATH="$TMP_DIR/app.AppImage"
+cp "$SRC_APP_IMAGE_PATH" "$TMP_APP_IMAGE_PATH"
+chmod +x "$TMP_APP_IMAGE_PATH"
+
+
+# 3. Extract its payload (creates squashfs-root/) by running it with --appimage-extract.
+debug "Extracting App Image contents..." >&2 | indent 2
+( cd "$TMP_DIR" && ./app.AppImage --appimage-extract >/dev/null 2>&1 )
+
+root="$TMP_DIR/squashfs-root"
+
+# 4. Locate the app's desktop icon and store it in a variable.
+debug "Locating desktop file in '$root'..." >&2 | indent 2  
+desktop="$(find "$root" -name '*.desktop' -print -quit)"
+desktop_dir="$(dirname "$desktop")"
+
+new_app_image=$(bin_name_from_desktop_file "$desktop")
+new_app_image+=".AppImage"
+debug "Renaming binary to match 'Exec' field in '$desktop'..."
+mv "$TMP_APP_IMAGE_PATH" "${TMP_DIR}${new_app_image}.AppImage"
+debug "'$TMP_APP_IMAGE_PATH' renamed to '$TMP_DIR/$new_app_image'!"
+TMP_APP_IMAGE_PATH="$TMP_DIR/$new_app_image"
+
+exit
+
+icon=
+# Icon= may list several names joined by ':'. Try each, resolving relative names
+# against the desktop file's directory, and trying common icon extensions when the
+# name has none (e.g. "subsurface-icon" -> "subsurface-icon.svg").
+icon_field="$(sed -n 's/^Icon=//p' "$desktop" | head -n1)"
+icon_exts=(".png" ".svg" ".ico" ".jpg" ".jpeg" ".webp" "")
+while IFS= read -r candidate; do
+  for ext in "${icon_exts[@]}"; do
+    if [[ "$candidate" = /* ]]; then
+      path="$candidate$ext"
+    else
+      path="$desktop_dir/$candidate$ext"
+    fi
+    if [[ -f "$path" ]]; then
+      icon="$path"
+      break 2
+    fi
+  done
+done <<< "$icon_field"
+
+# Fall back to a bundled icon shipped in an .iconset directory, else any bundled
+# image (preferring png over svg/ico).
+if [[ -z "$icon" ]]; then
+  icon="$(find "$root" -path '*.iconset/*' \( -name '*.png' -o -name '*.svg' -o -name '*.ico' \) -print | sort -V | tail -n1)"
+fi
+if [[ -z "$icon" ]]; then
+  icon="$(find "$root" \( -name '*.png' -o -name '*.svg' -o -name '*.ico' \) -print -quit)"
+fi
+
+echo "$icon"
+
+# 5. Print the desktop file's contents.
+cat "$desktop"
+
+# 6. Install the AppImage into ~/.local/bin (world-executable).
+mkdir -p "$BIN_DIR"
+install -m 755 "$appimage" "$BIN_DIR/"
+
+# 7. Install the icon.
+mkdir -p "$icon_dst"
+install -m 644 "$icon" "$icon_dst/"
+
+# 8. Install the desktop file.
+mkdir -p "$desktop_dst"
+install -m 644 "$desktop" "$desktop_dst/"
+
+# 9. Refresh the desktop database so launchers see the new entry.
+if command -v update-desktop-database >/dev/null; then
+  update-desktop-database "$desktop_dst"
+else
+  echo "update-desktop-database not found; skipping cache refresh." >&2
+fi
