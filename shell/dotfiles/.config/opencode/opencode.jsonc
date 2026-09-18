@@ -1,0 +1,35 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "model": "ollama/qwen3.8:27b-mlx",
+  "small_model": "ollama/qwen3.5:latest",
+  "provider": {
+    "ollama": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Ollama (local)",
+      "options": {
+        "baseURL": "https://ollama.snork.co/v1",
+        "apiKey": "ollama"
+      },
+      "models": {
+        "qwen2.5-coder:14b": {
+          "name": "Qwen 2.5 Coder 14B",
+          "tools": true
+        },
+        "qwen3.8": {
+          "name": "Qwen 3.8",
+          "tools": true
+        },
+        "qwen3.5:latest": {
+          "name": "Qwen 3.5",
+          "reasoning": true,
+          "tools": true
+        },
+        "qwen3.8:27b-mlx": {
+          "name": "Qwen 3.8 MLX",
+          "reasoning": true,
+          "tools": true
+        }
+      }
+    }
+  }
+}
