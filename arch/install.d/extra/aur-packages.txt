@@ -1,9 +1,10 @@
-1password
-brave-bin
-dropbox	# AUR	apps	dropbox	Dropbox sync daemon (run as a user systemd service)
-dropbox-cli
-grimblast
-nautilus-dropbox	# AUR	apps	dropbox-cli	Dropbox CLI + Nautilus extension and sync emblems [nautilus-dropbox provides the dropbox CLI and the Nautilus extension]
-obsidian	# extra	apps	obsidian	Markdown knowledge base / note-taking
-signal-desktop	# extra	apps	signal-desktop	Encrypted messaging client
-spotify
+1password              # 1Password password & secrets manager (app + CLI)
+brave-bin              # Privacy-focused web browser
+dropbox                # Dropbox sync client (run as a user systemd service)
+dropbox-cli            # Command-line interface for Dropbox
+grimblast              # Wayland screenshot & clipboard capture (grim + slurp)
+nautilus-dropbox       # Dropbox CLI + Nautilus extension and sync emblems
+obsidian               # Markdown-based knowledge base & note-taking
+signal-desktop         # Encrypted messaging client
+spotify                # Spotify music streaming client
+syncthingtray          # File synchronization with a system-tray UI

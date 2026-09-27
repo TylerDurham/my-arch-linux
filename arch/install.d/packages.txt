@@ -1,104 +1,105 @@
 
-awww	                  # extra	wayland	swww	Wayland wallpaper daemon with transitions [upstream renamed swww to awww]
+awww                    # Wayland animated wallpaper daemon (formerly swww)
 bat                     # cat clone with syntax highlighting and git integration
-bc                      # command line calculator
-bash-completion         # programmable tab-completion for the bash shell
-brightnessctl           # lightweight CLI for reading/setting display & LED brightness
-btop                    # resource monitor (CPU, memory, disks, network, processes)
-flatpak                 # sandboxed application runtime and distribution framework
-figlet
-fuse2                   # required for running some AppImages
-fzf                     # command-line fuzzy finder, used for interactive filtering
-grim                    # screenshot capture utility for Wayland compositors
+bc                      # Command-line calculator
+bash-completion         # Programmable tab-completion for bash
+brightnessctl           # Lightweight CLI to read/set display & LED brightness
+btop                    # Resource monitor (CPU, memory, disks, network, processes)
+flatpak                 # Sandboxed app runtime and distribution framework
+figlet                  # ASCII-art banner text generator
+fuse2                   # FUSE 2 - required to run many AppImages
+fzf                     # Interactive fuzzy finder for the command line
+grim                    # Screenshot capture utility for Wayland compositors
 hypridle                # Hyprland idle daemon (dims, locks, or suspends on timeout)
-hyprland                # dynamic tiling Wayland compositor - the desktop itself
+hyprland                # Dynamic tiling Wayland compositor - the desktop itself
 hyprlock                # Hyprland's GPU-accelerated screen locker
-hyprpolkitagent         # polkit authentication agent (GUI prompts for privileged actions)
-hyprshutdown            # graceful shutdown/reboot/logout helper for Hyprland
-hyprsunset              # blue-light filter / colour temperature control for Hyprland
-imagemagick             # image conversion and manipulation toolkit (convert, magick)
-iperf3                  # network utility for performance testing
-jq                      # command-line JSON processor
-lazygit                 # terminal UI for git
-lazydocker              # terminal UI for docker and docker compose
-libnotify               # library + notify-send CLI for desktop notifications
-lsd                     # modern ls replacement with colours and icons
-matugen                 # generates Material You colour schemes from a wallpaper
-fastfetch               # fast system info / fetch tool (neofetch replacement)
-neovim                  # hyperextensible Vim-based text editor
-rofi                    # application launcher, window switcher and dmenu replacement
-slurp                   # interactive region selector for Wayland (pairs with grim)
-stow                    # GNU Stow - symlink farm manager, used to deploy the dotfiles
-swaync                  # GTK notification daemon and notification centre
-swayosd                 # on-screen display for volume, brightness and caps-lock
-terminus-font           # bitmap console fonts, provides ter-132b for a larger TTY font
-tmux                    # terminal multiplexer (persistent sessions, splits, windows)
-tree                    # prints directory contents as an indented tree
-ttf-jetbrains-mono-nerd # JetBrains Mono patched with Nerd Font glyphs/icons
-unzip                   # extract .zip archives
-waybar                  # highly customizable status bar for Wayland compositors
-which                   # shows the full path of a command found on $PATH
+hyprpolkitagent         # polkit agent (GUI prompts for privileged actions)
+hyprshutdown            # Graceful shutdown/reboot/logout helper for Hyprland
+hyprsunset              # Blue-light / colour-temperature filter for Hyprland
+imagemagick             # Image conversion & manipulation toolkit (convert, magick)
+iperf3                  # Network throughput / performance testing tool
+jq                      # Command-line JSON processor
+lazygit                 # Terminal UI for git
+lazydocker              # Terminal UI for Docker and Docker Compose
+libnotify               # Desktop notification library + notify-send CLI
+lsd                     # Modern ls replacement with colours and icons
+matugen                 # Generates Material You colour schemes from a wallpaper
+fastfetch               # Fast system-info / fetch tool (neofetch replacement)
+neovim                  # Hyperextensible Vim-based text editor
+rofi                    # App launcher, window switcher, dmenu replacement
+slurp                   # Interactive region selector on Wayland (pairs with grim)
+stow                    # Symlink-farm manager used to deploy the dotfiles
+swaync                  # Notification daemon and notification centre
+swayosd                 # On-screen display for volume, brightness and caps-lock
+terminus-font           # Bitmap console fonts (provides a larger TTY font)
+tmux                    # Terminal multiplexer (sessions, splits, windows)
+tree                    # Prints directory contents as an indented tree
+ttf-jetbrains-mono-nerd # JetBrains Mono patched with Nerd Font glyphs
+unzip                   # Extract .zip archives
+waybar                  # Highly configurable status bar for Wayland compositors
+which                   # Shows the full path of a command found on $PATH
 wl-clipboard            # wl-copy / wl-paste clipboard utilities for Wayland
-xdg-user-dirs           # creates and manages ~/Desktop, ~/Downloads, ~/Music, etc.
-xdg-utils
-zoxide                  # shell CD fuzzy finder
-zip                     # create and modify .zip archives
-zsh                     # Z shell - the login/interactive shell for this setup
-man-db
-man-pages
+xdg-user-dirs           # Creates/manages ~/Desktop, ~/Downloads, ~/Music, etc.
+xdg-utils               # Utilities for opening & managing files (xdg-open, xdg-mime)
+zoxide                  # Smart cd with a fuzzy finder
+zip                     # Create and modify .zip archives
+zsh                     # Z shell - the interactive login shell for this setup
+man-db                  # man-page database & viewer (man, whatis, apropos)
+man-pages               # The actual man-page content (Linux & POSIX pages)
 
-# === media =================================================================
-mpv	                    # extra	media	mpv	General-purpose media player
-vlc	                    # extra	media	vlc	Versatile media player
-imv	                    # extra	media	imv	Lightweight Wayland image viewer
-pinta	                  # extra	media	pinta	Simple raster image editor
-playerctl	              # extra	media	playerctl	MPRIS media player controller
+# === media ===
+mpv                     # General-purpose media player
+vlc                     # Versatile media player
+imv                     # Lightweight Wayland image viewer
+pinta                   # Simple raster image editor (Paint.NET-like)
+playerctl               # Control MPRIS-capable media players from the CLI
 
-# === desktop / GNOME bits ==================================================
-nautilus	              # extra	desktop	nautilus	GTK file manager
-gnome-calculator	      # extra	desktop	gnome-calculator	GNOME calculator
-gnome-keyring	          # extra	desktop	gnome-keyring	Secret Service provider (org.freedesktop.secrets)
-libsecret	              # core	desktop	libsecret	Keyring access library for GNOME secrets
-dconf	                  # extra	desktop	dconf	GSettings configuration backend
-nwg-look	              # extra	desktop	nwg-look	GTK theme switcher for wlroots compositors
-nwg-displays            # GTK app for managing Hyprland monitors and workspaces.
-gvfs	                  # extra	desktop	gvfs	Virtual filesystem for GNOME (trash, mtp, network mounts)
-pavucontrol	            # extra	desktop	pavucontrol	PulseAudio/PipeWire volume control GUI
-rtkit	                  # extra	desktop	rtkit	Realtime scheduling policy daemon (PipeWire needs it to avoid audio crackle)
+# === desktop / GNOME bits ===
+nautilus                # GTK file manager
+gnome-calculator        # GNOME calculator
+gnome-keyring           # Secret Service provider (org.freedesktop.secrets)
+libsecret               # Keyring access library for GNOME secrets
+dconf                   # GSettings configuration backend
+nwg-look                # GTK theme switcher for wlroots compositors
+nwg-displays            # GUI for arranging monitors, workspaces and outputs
+gvfs                    # Virtual filesystem for GNOME (trash, MTP, network mounts)
+gvfs-smb                # GVFS backend for SMB/CIFS network shares
+pavucontrol             # PulseAudio / PipeWire volume-control GUI
+rtkit                   # Realtime scheduling daemon (PipeWire needs it to avoid audio crackle)
+syncthing               # Open-source peer-to-peer file synchronisation
 
-# === version control =======================================================
-git	                    # extra	vcs	git	Distributed version control, SSH-signed commits via 1Password
-git-delta	              # extra	vcs	delta	Syntax-highlighting pager for git diffs [Arch name is git-delta]
-lazygit	                # extra	vcs	lazygit	Terminal UI for git
+# === version control ===
+git                     # Distributed version control (SSH-signed commits via 1Password)
+git-delta               # Syntax-highlighting pager for git diffs
+lazygit                 # Terminal UI for git
 
-# === security ==============================================================
-fprintd	                # extra	security	fprintd	Fingerprint auth daemon (sudo, polkit, hyprlock, 1Password)
-openssh	                # core	security	openssh	SSH server, key-only auth, root login prohibited
+# === security ===
+fprintd                 # Fingerprint auth (sudo, polkit, hyprlock, 1Password)
+openssh                 # SSH server (key-only auth, no root login)
 
-# === development ===========================================================
-gcc	# core	dev	gcc	GNU C/C++ compiler toolchain
-make	# core	dev	gnumake	GNU make build tool [Arch name is make]
-just	# extra	dev	just	Command runner (justfile)
-mise	# extra	dev	mise	Polyglot dev-tool version manager (programs.mise)
-uv	# extra	dev	uv	Fast Python package/project manager (also listed under python)
-tree-sitter	# extra	dev	tree-sitter	Incremental parsing library and CLI
-hugo	# extra	dev	hugo	Static site generator
-stylua	# extra	dev	stylua	Lua code formatter
-github-cli	# extra	dev	github-cli	GitHub CLI (gh)
-grc	# extra	dev	grc	Generic colouriser for command output
+# === development ===
+gcc                     # GNU C/C++ compiler toolchain
+make                    # GNU make build tool
+just                    # Command runner (justfile)
+mise                    # Polyglot dev-tool version manager (programs.mise)
+uv                      # Fast Python package & project manager
+tree-sitter             # Incremental parsing library and CLI
+hugo                    # Static site generator
+stylua                  # Lua code formatter
+github-cli              # GitHub CLI (gh)
+grc                     # Generic colouriser for common command output
 
 # --- go ---
-go	# extra	dev-go	go	Go compiler and toolchain
-gopls	# extra	dev-go	gopls	Go language server
-go-tools	# extra	dev-go	gotools	Supplementary Go tools (goimports, etc.) [Arch name is go-tools]
+go                      # Go compiler and toolchain
+gopls                   # Go language server
+go-tools                # Supplementary Go tools (goimports, etc.)
 
 # --- node ---
-nodejs	# extra	dev-node	nodejs	Node.js runtime
-bun	# extra	dev-node	bun	Bun JavaScript runtime and package manager
-prettier	# extra	dev-node	prettier	Opinionated code formatter
+nodejs                  # Node.js runtime
+bun                     # JavaScript runtime and package manager
+prettier                # Opinionated multi-language code formatter
 
 # --- python ---
-python	# core	dev-python	python3	CPython 3 interpreter [Arch name is python; python3 is a symlink]
-python-black	# extra	dev-python	black	Python code formatter
-python-isort	# extra	dev-python	isort	Python import sorter
-
+python                  # CPython 3 interpreter (python3 is a symlink)
+python-black            # Python code formatter (black)
+python-isort            # Python import sorter (isort)
