@@ -44,7 +44,7 @@ hl.window_rule({
   name = "media-window",
   match = { tag = "media-window" },
   dim_around = true,
-  opacity = "1.0",
+  opacity = "1.0 override",
   workspace = "9"
 })
 
