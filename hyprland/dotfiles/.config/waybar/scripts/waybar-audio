@@ -1,4 +1,4 @@
-!/usr/bin/env bash
+#!/usr/bin/env bash
 
 # waybar-audio — JSON provider for the waybar "custom/audio" module.
 #
@@ -57,7 +57,25 @@ fi
 
 # --- playback state -------------------------------------------------------
 # -a checks every player, so a paused browser tab can't mask a playing one.
-if playerctl -a status 2>/dev/null | grep -qx "Playing"; then
+#
+# Some apps (the Plex desktop app) never register an MPRIS player, so fall
+# back to their PipeWire streams: an uncorked sink input means audio is
+# flowing. Allowlisted by binary because apps like Discord hold an uncorked
+# stream open while silent, which would pin the icon blue.
+STREAM_ALLOWLIST="plex plex-bin spotify"
+
+stream_playing() {
+  pactl list sink-inputs 2>/dev/null | awk -v allow="$STREAM_ALLOWLIST" '
+    BEGIN                              { n = split(allow, a, " "); for (i = 1; i <= n; i++) ok[a[i]] = 1 }
+    /^Sink Input #/                    { corked = "" }
+    $1 == "Corked:"                    { corked = $2 }
+    /application\.process\.binary = /  { bin = tolower($3); gsub(/"/, "", bin)
+                                         if (corked == "no" && bin in ok) { found = 1; exit } }
+    END                                { exit !found }
+  '
+}
+
+if playerctl -a status 2>/dev/null | grep -qx "Playing" || stream_playing; then
   state="playing"
 else
   state="idle"
