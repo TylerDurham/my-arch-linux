@@ -7,3 +7,4 @@ hypr-install-webapp "Github" "https://github.com/TylerDurham" "https://cdn.jsdel
 hypr-install-webapp "Claude.ai" "https://claude.ai/new" "https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/claude-ai.svg"
 hypr-install-webapp "LitCharts" "https://www.litcharts.com/" "https://cdn.jsdelivr.net/gh/selfhst/icons/svg/calibre.svg"
 hypr-install-webapp "Netflix" "https://netflix.com" "https://cdn.jsdelivr.net/gh/selfhst/icons/png/netflix.png"
+hypr-install-webapp "Excalidraw" "https://app.excalidraw.com/w/6AP1zJbAufV/dashboard" "https://github.com/TylerDurham/my-icons/blob/master/apps/services/excalidraw.png?raw=true"
