@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+readonly filename="$HOME/.env/ai.env"
+
+echo "" > "$filename"
+
+echo "export AI_API_TOKEN=$(op read "op://Homelab/ai-services-config/credential")" >> "$filename"
+echo "export AI_LLM_URL=$(op read "op://Homelab/ai-services-config/ai_llm_url")" >> "$filename"
+echo "export AI_SEARCH_URL=$(op read "op://Homelab/ai-services-config/ai_search_url")" >> "$filename"
+echo "export AI_SEARCH_MCP_URL=$(op read "op://Homelab/ai-services-config/ai_search_mcp_url")" >> "$filename"
+
+source "$filename"
+
+curl -H "Authorization: Bearer $AI_API_TOKEN" "$AI_LLM_URL/api/tags" | jq
+
+
