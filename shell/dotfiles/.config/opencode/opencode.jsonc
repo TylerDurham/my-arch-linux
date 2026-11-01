@@ -1,50 +1,32 @@
 {
   "$schema": "https://opencode.ai/config.json",
-  "model": "ollama/qwen3.8:27b-q8_0",
-  "small_model": "ollama/qwen3.5:latest",
-  "provider": {
-    "ollama": {
-      "npm": "@ai-sdk/openai-compatible",
-      "name": "Ollama (local)",
-      "options": {
-        "baseURL": "https://ollama.snork.co/v1",
-        "apiKey": "ollama"
+  "providers": {
+    "homelab": {
+      "name": "Homelab",
+      "env": ["AI_API_TOKEN"],
+      "package": "@opencode/ai/providers/openai-compatible",
+      "settings": {
+        "baseURL": "{env:AI_LLM_URL}/v1"
       },
       "models": {
-        "qwen3.6:35b-a3b": {
-          "name": "Qwen 3.6 35b",
-          "tools": true,
-          "reasoning": true
+        "qwen3-coder-q8": {
+          "modelID": "qwen3-coder-next:q8_0",
+          "name": "Qwen 3 Coder q8",
+          "capabilities": { "tools": true, "input": ["text"], "output": ["text"] },
+          "limit": { "context": 32768, "output": 8192 }
         },
-        "qwen2.5-coder:14b": {
-          "name": "Qwen 2.5 Coder 14B",
-          "tools": true
+        "qwen3.5-9b": {
+          "modelID": "qwen3.5:9b",
+          "name": "Qwen 3.5 9b",
+          "capabilities": { "tools": true, "input": ["text"], "output": ["text"] },
+          "limit": { "context": 32768, "output": 8192 }
         },
-        "qwen3.8": {
-          "name": "Qwen 3.8",
-          "tools": true
-        },
-        "qwen3.5:latest": {
-          "name": "Qwen 3.5",
-          "reasoning": true,
-          "tools": true
-        },
-        "qwen3.8:27b-mlx": {
-          "name": "Qwen 3.8 MLX",
-          "reasoning": true,
-          "tools": true
+        "qwen3-coder": {
+          "modelID": "qwen3-coder-next:latest",
+          "name": "Qwen 3 Coder",
+          "capabilities": { "tools": true, "input": ["text"], "output": ["text"] },
+          "limit": { "context": 32768, "output": 8192 }
         }
-      }
-    }
-  },
-  "mcp": {
-    "searxng": {
-      "type": "remote",
-      "url": "https://mcp-search.snork.co/mcp",
-      "enabled": true,
-      "oauth": false,
-      "headers": {
-        "Authorization": "Bearer Normal-Pros@iac-F0rte"
       }
     }
   }
