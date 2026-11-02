@@ -34,7 +34,15 @@ fi
 # Open in nvim for review
 echo "Opening commit message in nvim for review..."
 echo "Edit the message then save and quit (:wq or :x) to commit, or quit without saving (:q!) to abort."
+before_mtime=$(stat -c %.9Y "$COMMIT_MSG_FILE")
 nvim "$COMMIT_MSG_FILE"
+after_mtime=$(stat -c %.9Y "$COMMIT_MSG_FILE")
+
+# Abort if the file wasn't written (e.g. :q!)
+if [ "$before_mtime" = "$after_mtime" ]; then
+    echo "Commit message not saved. Commit aborted."
+    exit 0
+fi
 
 # After nvim closes, verify file still has content
 if [ ! -s "$COMMIT_MSG_FILE" ]; then
